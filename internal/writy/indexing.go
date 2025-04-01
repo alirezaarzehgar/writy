@@ -19,6 +19,8 @@ const (
 
 var lk sync.Mutex
 
+// TODO: Redesign this and find efficient way for writing may lines once.
+// This implementation is not performant.
 func writeIndex(w *writy, k string, v any) {
 	storage := w.storageWriter
 	ind := w.indexWriter

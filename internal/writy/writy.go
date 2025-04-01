@@ -78,8 +78,12 @@ func (w *writy) WithLogHandler(handler slog.Handler) keyval.KeyVal {
 	return w
 }
 
+// NOTE: In this version our goal is performance.
+// Checking fs for duplication is not suitable for us.
+// Initial solution is overwrite values when duplication occures.
+// Overwrites should be handled while flushing.
 func (w writy) Set(key, value string) error {
-	return w.cache.Set(key, value)
+	return w.ForceSet(key, value)
 }
 
 func (w writy) ForceSet(key string, value any) error {

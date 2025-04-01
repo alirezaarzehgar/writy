@@ -40,17 +40,6 @@ func (f *Flusher) flush() {
 	list, _ := f.writy.cache.List()
 	for k, v := range list {
 		writeIndex(f.writy, k, v)
-
-		// lineValue, err := json.Marshal(v)
-		// if err != nil {
-		// 	f.logger.Debug("can not marshal value", "error", err)
-		// 	continue
-		// }
-		// f.logger.Debug("write to fs", "key", k, "value", v)
-
-		// json.NewEncoder(f.writy.storageWriter).Encode(
-		// 	line{Key: k, Value: string(lineValue)},
-		// )
 	}
 }
 
