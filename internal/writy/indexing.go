@@ -1,8 +1,11 @@
 package writy
 
 import (
+	"bufio"
 	"encoding/json"
+	"fmt"
 	"io"
+	"strconv"
 	"sync"
 )
 
@@ -13,11 +16,11 @@ const (
 
 	// index data: ["key", offset, is_deleted]
 	INDEX_KEY        = 0
-	INDEX_VALUE      = 1
+	INDEX_OFFSET     = 1
 	INDEX_IS_DELETED = 2
 )
 
-var lk sync.Mutex
+var lk sync.RWMutex
 
 // TODO: Redesign this and find efficient way for writing may lines once.
 // This implementation is not performant.
@@ -50,6 +53,27 @@ func writeIndex(w *writy, k string, v any) {
 	}
 }
 
-func searchIndex() {
+func searchIndexByKey(w *writy, k string) (int64, error) {
+	lk.RLock()
+	defer lk.RUnlock()
 
+	w.indexReader.Seek(0, io.SeekStart)
+	scanner := bufio.NewScanner(bufio.NewReader(w.indexReader))
+
+	for scanner.Scan() {
+		var indLine []any
+		if err := json.Unmarshal(scanner.Bytes(), &indLine); err != nil {
+			w.logger.Debug("unable to decode index line", "error", err, "line", scanner.Text())
+			continue
+		}
+
+		fkey := fmt.Sprint(indLine[INDEX_KEY])
+		foff, _ := strconv.ParseInt(fmt.Sprint(indLine[INDEX_OFFSET]), 0, 64)
+		w.logger.Debug("check keys", "searched key", k, "found key", fkey, "offset", foff)
+		if k == fkey {
+			return foff, nil
+		}
+	}
+
+	return -1, notfoundError{Key: k}
 }

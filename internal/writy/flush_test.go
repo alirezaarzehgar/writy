@@ -1,4 +1,4 @@
-package writy_test
+package writy
 
 import (
 	"fmt"
@@ -6,13 +6,10 @@ import (
 	"os"
 	"testing"
 	"time"
-
-	"github.com/alirezaarzehgar/writy/internal/writy"
 )
 
 func TestFlush(t *testing.T) {
-	t.Fail()
-	w, err := writy.New(".", time.Second)
+	w, err := New(".", time.Second)
 	if err != nil {
 		t.Fatal("unable to open storage")
 	}
@@ -30,5 +27,24 @@ func TestFlush(t *testing.T) {
 	for i := 0; i < 10; i++ {
 		time.Sleep(time.Second / 3)
 		w.Set(fmt.Sprint("key-", i), "vvv")
+	}
+}
+
+func TestSearchIndexByKey(t *testing.T) {
+	w, err := New(".", time.Second)
+	if err != nil {
+		t.Fatal("unable to open storage")
+	}
+	w.WithLogHandler(slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{Level: slog.LevelDebug}))
+
+	writyW := w.(*writy)
+	_, err = searchIndexByKey(writyW, "notfound")
+	if !IsNotFound(err) {
+		t.Error("false positive on search")
+	}
+
+	off, err := searchIndexByKey(writyW, "key-5")
+	if err != nil || off != 119 {
+		t.Error("search by index is not correct", off, err)
 	}
 }
