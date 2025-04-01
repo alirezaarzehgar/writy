@@ -1,13 +1,18 @@
 package cache_test
 
 import (
+	"log/slog"
+	"os"
 	"testing"
 
 	"github.com/alirezaarzehgar/writy/cache"
 )
 
 func TestCache(t *testing.T) {
-	c := cache.New()
+	c := cache.New().WithLogHandler(slog.NewJSONHandler(
+		os.Stderr,
+		&slog.HandlerOptions{Level: slog.LevelDebug},
+	))
 
 	err := c.Set("name", "ali")
 	if err != nil {
