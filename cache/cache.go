@@ -2,28 +2,28 @@ package cache
 
 import (
 	"log/slog"
-
-	"github.com/alirezaarzehgar/writy/internal/keyval"
 )
 
-type cache struct {
+type StorageType map[string]any
+
+type Cache struct {
 	logger  *slog.Logger
-	storage keyval.StorageType
+	storage StorageType
 }
 
-func New() keyval.KeyVal {
-	return &cache{
+func New() *Cache {
+	return &Cache{
 		storage: make(map[string]any),
 		logger:  slog.Default(),
 	}
 }
 
-func (c *cache) WithLogHandler(handler slog.Handler) keyval.KeyVal {
+func (c *Cache) SetLogHandler(handler slog.Handler) *Cache {
 	c.logger = slog.New(handler)
 	return c
 }
 
-func (c *cache) Set(key, value string) error {
+func (c *Cache) Set(key, value string) error {
 	if _, ok := c.storage[key]; ok {
 		c.logger.Debug("duplicated key")
 		return duplicatedError{key}
@@ -31,12 +31,12 @@ func (c *cache) Set(key, value string) error {
 	return c.ForceSet(key, value)
 }
 
-func (c *cache) ForceSet(key string, value any) error {
+func (c *Cache) ForceSet(key string, value any) error {
 	c.storage[key] = value
 	return nil
 }
 
-func (c *cache) Get(key string) (any, error) {
+func (c *Cache) Get(key string) (any, error) {
 	value, ok := c.storage[key]
 	if !ok {
 		c.logger.Debug("key not found")
@@ -45,7 +45,7 @@ func (c *cache) Get(key string) (any, error) {
 	return value, nil
 }
 
-func (c *cache) Del(key string) error {
+func (c *Cache) Del(key string) error {
 	_, ok := c.storage[key]
 	if !ok {
 		c.logger.Debug("key not found")
@@ -56,16 +56,12 @@ func (c *cache) Del(key string) error {
 	return nil
 }
 
-func (c *cache) Clear() error {
+func (c *Cache) Clear() error {
 	c.logger.Debug("clear storage", "storage", c.storage)
 	c.storage = make(map[string]any)
 	return nil
 }
 
-func (c *cache) List() (keyval.StorageType, error) {
+func (c *Cache) List() (StorageType, error) {
 	return c.storage, nil
-}
-
-func (c *cache) Close() {
-	c.Clear()
 }

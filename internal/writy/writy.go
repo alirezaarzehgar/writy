@@ -9,25 +9,26 @@ import (
 	"time"
 
 	"github.com/alirezaarzehgar/writy/cache"
-	"github.com/alirezaarzehgar/writy/internal/keyval"
 )
+
+type StorageType map[string]any
 
 var (
 	DefaultStoragePath string        = fmt.Sprintf("%s", os.Getenv("HOME"))
 	DefaultFlushCycle  time.Duration = time.Second * 5
 )
 
-type writy struct {
+type Writy struct {
 	logger        *slog.Logger
 	storageReader *os.File
 	storageWriter *os.File
 	indexReader   *os.File
 	indexWriter   *os.File
 	flusher       *Flusher
-	cache         keyval.KeyVal
+	cache         *cache.Cache
 }
 
-func New(path string, exp time.Duration) (*writy, error) {
+func New(path string, exp time.Duration) (*Writy, error) {
 	if path == "" {
 		path = DefaultStoragePath
 	}
@@ -55,7 +56,7 @@ func New(path string, exp time.Duration) (*writy, error) {
 		return nil, fmt.Errorf("unable open file %s for reading: %w", path, err)
 	}
 
-	w := &writy{
+	w := &Writy{
 		storageReader: sReader,
 		storageWriter: sWriter,
 		indexReader:   iReader,
@@ -63,17 +64,17 @@ func New(path string, exp time.Duration) (*writy, error) {
 		flusher:       NewFlusher(exp),
 		cache:         cache.New(),
 	}
-	w.WithLogHandler(slog.Default().Handler())
+	w.SetLogHandler(slog.Default().Handler())
 
 	w.flusher.Run(w)
 
 	return w, nil
 }
 
-func (w *writy) WithLogHandler(handler slog.Handler) keyval.KeyVal {
+func (w *Writy) SetLogHandler(handler slog.Handler) *Writy {
 	w.logger = slog.New(handler)
 	w.flusher.logger = w.logger
-	w.cache.WithLogHandler(handler)
+	w.cache.SetLogHandler(handler)
 	w.logger.Debug("enable logger")
 	return w
 }
@@ -81,15 +82,15 @@ func (w *writy) WithLogHandler(handler slog.Handler) keyval.KeyVal {
 // NOTE: In this version our goal is performance.
 // Checking fs for duplication is not suitable for us.
 // Initial solution is ignoring duplicated records when flushing.
-func (w writy) Set(key, value string) error {
+func (w Writy) Set(key, value string) error {
 	return w.ForceSet(key, value)
 }
 
-func (w writy) ForceSet(key string, value any) error {
+func (w Writy) ForceSet(key string, value any) error {
 	return w.cache.ForceSet(key, value)
 }
 
-func (w writy) Get(key string) (any, error) {
+func (w Writy) Get(key string) (any, error) {
 	v, err := w.cache.Get(key)
 	if !cache.IsNotFound(err) {
 		w.logger.Debug("cache: key found", "key", key, "value", v, "err", err)
@@ -105,20 +106,20 @@ func (w writy) Get(key string) (any, error) {
 	return getValueByOffset(&w, off), nil
 }
 
-func (w writy) Del(key string) error {
+func (w Writy) Del(key string) error {
 	return nil
 }
 
-func (w writy) Clear() error {
+func (w Writy) Clear() error {
 	return nil
 }
 
-func (w writy) List() (keyval.StorageType, error) {
+func (w Writy) List() (StorageType, error) {
 	// Append cache to fs
 	return nil, nil
 }
 
-func (w writy) Close() {
+func (w Writy) Close() {
 	w.flusher.flush()
 	return
 }

@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-var w *writy
+var w *Writy
 
 func TestFlush(t *testing.T) {
 	var err error
@@ -16,7 +16,10 @@ func TestFlush(t *testing.T) {
 	if err != nil {
 		t.Fatal("unable to open storage")
 	}
-	w.WithLogHandler(slog.NewJSONHandler(os.Stderr, &slog.HandlerOptions{Level: slog.LevelDebug}))
+	w.SetLogHandler(slog.NewJSONHandler(os.Stderr, &slog.HandlerOptions{
+		Level:     slog.LevelDebug,
+		AddSource: false,
+	}))
 	defer w.Close()
 
 	w.Set("name", "ali")

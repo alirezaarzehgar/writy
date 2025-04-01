@@ -9,7 +9,7 @@ import (
 )
 
 func TestCache(t *testing.T) {
-	c := cache.New().WithLogHandler(slog.NewJSONHandler(
+	c := cache.New().SetLogHandler(slog.NewJSONHandler(
 		os.Stderr,
 		&slog.HandlerOptions{Level: slog.LevelDebug},
 	))

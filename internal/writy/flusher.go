@@ -9,7 +9,7 @@ type Flusher struct {
 	logger  *slog.Logger
 	running bool
 	cycle   time.Duration
-	writy   *writy
+	writy   *Writy
 }
 
 func NewFlusher(cycle time.Duration) *Flusher {
@@ -20,7 +20,7 @@ func (f *Flusher) SetCycle(c time.Duration) {
 	f.cycle = c
 }
 
-func (f *Flusher) Run(w *writy) {
+func (f *Flusher) Run(w *Writy) {
 	f.writy = w
 
 	go func() {

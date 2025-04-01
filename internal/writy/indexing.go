@@ -24,7 +24,7 @@ var lk sync.RWMutex
 
 // TODO: Redesign this and find efficient way for writing may lines once.
 // This implementation is not performant.
-func writeIndex(w *writy, k string, v any) {
+func writeIndex(w *Writy, k string, v any) {
 	storage := w.storageWriter
 	ind := w.indexWriter
 
@@ -53,7 +53,7 @@ func writeIndex(w *writy, k string, v any) {
 	}
 }
 
-func searchIndexByKey(w *writy, k string) int64 {
+func searchIndexByKey(w *Writy, k string) int64 {
 	lk.RLock()
 	defer lk.RUnlock()
 
@@ -72,6 +72,7 @@ func searchIndexByKey(w *writy, k string) int64 {
 		isDel, _ := strconv.ParseBool(fmt.Sprint(indLine[INDEX_IS_DELETED]))
 
 		if !isDel && k == fkey {
+			w.logger.Debug("found offset", "fkey", fkey, "k", k, "isdel", isDel, "offset", foff)
 			return foff
 		}
 	}
@@ -79,7 +80,7 @@ func searchIndexByKey(w *writy, k string) int64 {
 	return -1
 }
 
-func getValueByOffset(w *writy, off int64) any {
+func getValueByOffset(w *Writy, off int64) any {
 	off, err := w.storageReader.Seek(off, io.SeekCurrent)
 	if err != nil {
 		w.logger.Debug("unable seek to off position", "error", err, "offset", off)
@@ -91,10 +92,11 @@ func getValueByOffset(w *writy, off int64) any {
 
 	var storLine []string
 	if err := json.Unmarshal(scanner.Bytes(), &storLine); err != nil {
-		w.logger.Debug("failed to unmarshal storage line", "offset", off, "error", err, "line", scanner.Text())
+		w.logger.Debug("failed to unmarshal storage line",
+			"offset", off, "error", err, "line", scanner.Text())
 		return nil
 	}
 
-	w.logger.Debug("getValueByOffset: desirable line found", "line", storLine)
+	w.logger.Debug("desirable line found", "line", storLine)
 	return storLine[STORAGE_VALUE]
 }
