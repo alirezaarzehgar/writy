@@ -39,7 +39,9 @@ func (f *Flusher) flush() {
 
 	list, _ := f.writy.cache.List()
 	for k, v := range list {
-		writeIndex(f.writy, k, v)
+		if searchIndexByKey(f.writy, k) < 0 {
+			writeIndex(f.writy, k, v)
+		}
 	}
 }
 

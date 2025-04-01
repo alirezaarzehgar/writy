@@ -12,7 +12,7 @@ func (e notfoundError) Error() string {
 	return fmt.Sprint("not found: ", e.Key)
 }
 
-func IsNotFound(err error) bool {
+func ErrIsNotFound(err error) bool {
 	switch err.(type) {
 	case notfoundError:
 		return true
@@ -21,4 +21,8 @@ func IsNotFound(err error) bool {
 	default:
 		return false
 	}
+}
+
+func IsDuplicated(err error) bool {
+	return !ErrIsNotFound(err)
 }

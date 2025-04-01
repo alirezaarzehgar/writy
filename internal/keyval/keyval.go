@@ -12,4 +12,5 @@ type KeyVal interface {
 	Del(key string) error
 	Clear() error
 	List() (StorageType, error)
+	Close()
 }

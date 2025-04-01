@@ -65,3 +65,7 @@ func (c *cache) Clear() error {
 func (c *cache) List() (keyval.StorageType, error) {
 	return c.storage, nil
 }
+
+func (c *cache) Close() {
+	c.Clear()
+}

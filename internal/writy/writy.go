@@ -27,7 +27,7 @@ type writy struct {
 	cache         keyval.KeyVal
 }
 
-func New(path string, exp time.Duration) (keyval.KeyVal, error) {
+func New(path string, exp time.Duration) (*writy, error) {
 	if path == "" {
 		path = DefaultStoragePath
 	}
@@ -80,8 +80,7 @@ func (w *writy) WithLogHandler(handler slog.Handler) keyval.KeyVal {
 
 // NOTE: In this version our goal is performance.
 // Checking fs for duplication is not suitable for us.
-// Initial solution is overwrite values when duplication occures.
-// Overwrites should be handled while flushing.
+// Initial solution is ignoring duplicated records when flushing.
 func (w writy) Set(key, value string) error {
 	return w.ForceSet(key, value)
 }
@@ -91,15 +90,19 @@ func (w writy) ForceSet(key string, value any) error {
 }
 
 func (w writy) Get(key string) (any, error) {
-	// search in the cache
 	v, err := w.cache.Get(key)
 	if !cache.IsNotFound(err) {
-		w.logger.Debug("key found", "key", key, "value", v, "err", err)
+		w.logger.Debug("cache: key found", "key", key, "value", v, "err", err)
 		return v, nil
 	}
 
-	// search in the fs
-	return "", err
+	off := searchIndexByKey(&w, key)
+	if off < 0 {
+		w.logger.Debug("index: key found", "key", key, "value", v, "err", err)
+		return nil, notfoundError{}
+	}
+
+	return getValueByOffset(&w, off), nil
 }
 
 func (w writy) Del(key string) error {
@@ -113,4 +116,9 @@ func (w writy) Clear() error {
 func (w writy) List() (keyval.StorageType, error) {
 	// Append cache to fs
 	return nil, nil
+}
+
+func (w writy) Close() {
+	w.flusher.flush()
+	return
 }

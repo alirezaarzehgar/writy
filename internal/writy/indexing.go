@@ -53,7 +53,7 @@ func writeIndex(w *writy, k string, v any) {
 	}
 }
 
-func searchIndexByKey(w *writy, k string) (int64, error) {
+func searchIndexByKey(w *writy, k string) int64 {
 	lk.RLock()
 	defer lk.RUnlock()
 
@@ -69,11 +69,32 @@ func searchIndexByKey(w *writy, k string) (int64, error) {
 
 		fkey := fmt.Sprint(indLine[INDEX_KEY])
 		foff, _ := strconv.ParseInt(fmt.Sprint(indLine[INDEX_OFFSET]), 0, 64)
-		w.logger.Debug("check keys", "searched key", k, "found key", fkey, "offset", foff)
-		if k == fkey {
-			return foff, nil
+		isDel, _ := strconv.ParseBool(fmt.Sprint(indLine[INDEX_IS_DELETED]))
+
+		if !isDel && k == fkey {
+			return foff
 		}
 	}
 
-	return -1, notfoundError{Key: k}
+	return -1
+}
+
+func getValueByOffset(w *writy, off int64) any {
+	off, err := w.storageReader.Seek(off, io.SeekCurrent)
+	if err != nil {
+		w.logger.Debug("unable seek to off position", "error", err, "offset", off)
+		return nil
+	}
+
+	scanner := bufio.NewScanner(bufio.NewReader(w.storageReader))
+	scanner.Scan()
+
+	var storLine []string
+	if err := json.Unmarshal(scanner.Bytes(), &storLine); err != nil {
+		w.logger.Debug("failed to unmarshal storage line", "offset", off, "error", err, "line", scanner.Text())
+		return nil
+	}
+
+	w.logger.Debug("getValueByOffset: desirable line found", "line", storLine)
+	return storLine[STORAGE_VALUE]
 }
