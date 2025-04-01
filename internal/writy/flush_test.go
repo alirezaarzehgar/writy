@@ -35,7 +35,6 @@ func TestSearchIndexByKey(t *testing.T) {
 	if err != nil {
 		t.Fatal("unable to open storage")
 	}
-	w.WithLogHandler(slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{Level: slog.LevelDebug}))
 
 	writyW := w.(*writy)
 	_, err = searchIndexByKey(writyW, "notfound")
@@ -47,4 +46,5 @@ func TestSearchIndexByKey(t *testing.T) {
 	if err != nil || off != 119 {
 		t.Error("search by index is not correct", off, err)
 	}
+	t.Log("offset:", off, ", error:", err)
 }

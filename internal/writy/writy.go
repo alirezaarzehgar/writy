@@ -56,7 +56,6 @@ func New(path string, exp time.Duration) (keyval.KeyVal, error) {
 	}
 
 	w := &writy{
-		logger:        slog.Default(),
 		storageReader: sReader,
 		storageWriter: sWriter,
 		indexReader:   iReader,
@@ -64,6 +63,7 @@ func New(path string, exp time.Duration) (keyval.KeyVal, error) {
 		flusher:       NewFlusher(exp),
 		cache:         cache.New(),
 	}
+	w.WithLogHandler(slog.Default().Handler())
 
 	w.flusher.Run(w)
 
