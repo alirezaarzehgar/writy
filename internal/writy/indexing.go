@@ -11,9 +11,10 @@ const (
 	STORAGE_KEY   = 0
 	STORAGE_VALUE = 1
 
-	// index data: ["key", offset]
-	INDEX_KEY   = 0
-	INDEX_VALUE = 1
+	// index data: ["key", offset, is_deleted]
+	INDEX_KEY        = 0
+	INDEX_VALUE      = 1
+	INDEX_IS_DELETED = 2
 )
 
 var lk sync.Mutex
@@ -41,7 +42,7 @@ func writeIndex(w *writy, k string, v any) {
 	if err := json.NewEncoder(storage).Encode(l); err != nil {
 		w.logger.Warn("unable to encode data", "error", err, "line", l)
 	}
-	i := []any{k, off}
+	i := []any{k, off, 0}
 	if err := json.NewEncoder(ind).Encode(i); err != nil {
 		w.logger.Warn("unable to encode data", "error", err, "line", i)
 	}
