@@ -8,7 +8,7 @@ import (
 
 type cache struct {
 	logger  *slog.Logger
-	storage map[string]any
+	storage keyval.StorageType
 }
 
 func New() keyval.KeyVal {
@@ -60,4 +60,8 @@ func (c *cache) Clear() error {
 	c.logger.Debug("clear storage", "storage", c.storage)
 	c.storage = make(map[string]any)
 	return nil
+}
+
+func (c *cache) List() (keyval.StorageType, error) {
+	return c.storage, nil
 }

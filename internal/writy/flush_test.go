@@ -12,7 +12,7 @@ import (
 
 func TestFlush(t *testing.T) {
 	t.Fail()
-	w, err := writy.New("./storage.db", time.Second)
+	w, err := writy.New(".", time.Second)
 	if err != nil {
 		t.Fatal("unable to open storage")
 	}
@@ -29,6 +29,6 @@ func TestFlush(t *testing.T) {
 
 	for i := 0; i < 10; i++ {
 		time.Sleep(time.Second / 3)
-		w.Set(fmt.Sprint("key-", i), "value")
+		w.Set(fmt.Sprint("key-", i), "vvv")
 	}
 }

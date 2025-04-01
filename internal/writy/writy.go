@@ -2,8 +2,10 @@ package writy
 
 import (
 	"fmt"
+	"io"
 	"log/slog"
 	"os"
+	"path/filepath"
 	"time"
 
 	"github.com/alirezaarzehgar/writy/cache"
@@ -11,7 +13,7 @@ import (
 )
 
 var (
-	DefaultStoragePath string        = fmt.Sprintf("%s/writy.db", os.Getenv("HOME"))
+	DefaultStoragePath string        = fmt.Sprintf("%s", os.Getenv("HOME"))
 	DefaultFlushCycle  time.Duration = time.Second * 5
 )
 
@@ -19,6 +21,8 @@ type writy struct {
 	logger        *slog.Logger
 	storageReader *os.File
 	storageWriter *os.File
+	indexReader   *os.File
+	indexWriter   *os.File
 	flusher       *Flusher
 	cache         keyval.KeyVal
 }
@@ -28,12 +32,25 @@ func New(path string, exp time.Duration) (keyval.KeyVal, error) {
 		path = DefaultStoragePath
 	}
 
-	wReader, err := os.OpenFile(path, os.O_CREATE|os.O_WRONLY, 0644)
+	storagePath := filepath.Join(path, "storage.db")
+	sWriter, err := os.OpenFile(storagePath, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0644)
+	if err != nil {
+		return nil, fmt.Errorf("unable open file %s for writing: %w", path, err)
+	}
+	sWriter.Seek(0, io.SeekEnd)
+
+	sReader, err := os.Open(storagePath)
+	if err != nil {
+		return nil, fmt.Errorf("unable open file %s for reading: %w", path, err)
+	}
+
+	indexPath := filepath.Join(path, "index.db")
+	iWriter, err := os.OpenFile(indexPath, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0644)
 	if err != nil {
 		return nil, fmt.Errorf("unable open file %s for writing: %w", path, err)
 	}
 
-	sReader, err := os.Open(path)
+	iReader, err := os.Open(indexPath)
 	if err != nil {
 		return nil, fmt.Errorf("unable open file %s for reading: %w", path, err)
 	}
@@ -41,7 +58,9 @@ func New(path string, exp time.Duration) (keyval.KeyVal, error) {
 	w := &writy{
 		logger:        slog.Default(),
 		storageReader: sReader,
-		storageWriter: wReader,
+		storageWriter: sWriter,
+		indexReader:   iReader,
+		indexWriter:   iWriter,
 		flusher:       NewFlusher(exp),
 		cache:         cache.New(),
 	}
@@ -85,4 +104,9 @@ func (w writy) Del(key string) error {
 
 func (w writy) Clear() error {
 	return nil
+}
+
+func (w writy) List() (keyval.StorageType, error) {
+	// Append cache to fs
+	return nil, nil
 }
