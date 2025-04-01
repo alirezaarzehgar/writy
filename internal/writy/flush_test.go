@@ -20,7 +20,7 @@ func TestFlush(t *testing.T) {
 		Level:     slog.LevelDebug,
 		AddSource: false,
 	}))
-	defer w.Close()
+	defer w.Flush()
 
 	w.Set("name", "ali")
 	t.Log("ali saved in name")

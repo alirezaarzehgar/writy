@@ -110,16 +110,12 @@ func (w Writy) Del(key string) error {
 	return nil
 }
 
-func (w Writy) Clear() error {
-	return nil
-}
-
 func (w Writy) List() (StorageType, error) {
 	// Append cache to fs
 	return nil, nil
 }
 
-func (w Writy) Close() {
+func (w Writy) Flush() {
 	w.flusher.flush()
 	return
 }
