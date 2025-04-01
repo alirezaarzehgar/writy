@@ -1,6 +1,8 @@
 package cache
 
-import "fmt"
+import (
+	"fmt"
+)
 
 type notfoundError struct {
 	Key string
@@ -19,11 +21,23 @@ func (e duplicatedError) Error() string {
 }
 
 func IsNotFound(err error) bool {
-	_, ok := err.(*notfoundError)
-	return ok
+	switch err.(type) {
+	case notfoundError:
+		return true
+	case *notfoundError:
+		return true
+	default:
+		return false
+	}
 }
 
 func IsDuplicated(err error) bool {
-	_, ok := err.(*duplicatedError)
-	return ok
+	switch err.(type) {
+	case duplicatedError:
+		return true
+	case *duplicatedError:
+		return true
+	default:
+		return false
+	}
 }

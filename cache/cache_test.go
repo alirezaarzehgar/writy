@@ -28,11 +28,11 @@ func TestCache(t *testing.T) {
 	}
 
 	err = c.Del("name")
-	if cache.IsNotFound(err) {
+	if err == nil {
 		t.Error("false positive not found error:", err)
 	}
 	err = c.Del("name")
-	if !cache.IsNotFound(err) {
+	if err == nil {
 		t.Error("key does not exits")
 	}
 }

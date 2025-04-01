@@ -49,7 +49,7 @@ func (c *cache) Del(key string) error {
 	_, ok := c.storage[key]
 	if !ok {
 		c.logger.Debug("key not found")
-		return &notfoundError{key}
+		return notfoundError{key}
 	}
 
 	delete(c.storage, key)
@@ -57,7 +57,7 @@ func (c *cache) Del(key string) error {
 }
 
 func (c *cache) Clear() error {
-	c.logger.Debug("clear storage")
+	c.logger.Debug("clear storage", "storage", c.storage)
 	c.storage = make(map[string]any)
 	return nil
 }
