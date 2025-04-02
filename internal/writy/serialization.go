@@ -55,9 +55,9 @@ func (s storageEncoder) Encode(key string, value any) int64 {
 	lk.Lock()
 	defer lk.Unlock()
 
+	offset, _ := s.f.Seek(0, io.SeekCurrent)
 	line := strconv.Quote(fmt.Sprint(value)) + "\n"
 	s.f.WriteString(line)
-	offset, _ := s.f.Seek(0, io.SeekCurrent)
 	return offset
 }
 
