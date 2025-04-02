@@ -2,6 +2,7 @@ package writy
 
 import (
 	"bufio"
+	"encoding/json"
 	"fmt"
 	"io"
 	"os"
@@ -54,4 +55,20 @@ func (s storageEncoder) Encode(key string, value any) int64 {
 	s.f.WriteString(line)
 	offset, _ := s.f.Seek(0, io.SeekCurrent)
 	return offset
+}
+
+type indexEncoder struct {
+	f *os.File
+}
+
+func newIndexEncoder(f *os.File) *indexEncoder {
+	return &indexEncoder{f: f}
+}
+
+func (s indexEncoder) Encode(key string, offset int64) error {
+	lk.Lock()
+	defer lk.Unlock()
+
+	index := []any{key, offset, 0}
+	return json.NewEncoder(s.f).Encode(index)
 }

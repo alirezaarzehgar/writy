@@ -21,13 +21,10 @@ var lk sync.RWMutex
 // TODO: Redesign this and find efficient way for writing may lines once.
 // This implementation is not performant.
 func writeIndex(w *Writy, k string, v any) {
-	ind := w.indexWriter
-
 	off := newStorageEncoder(w.storageWriter).Encode(k, v)
-
-	index := []any{k, off, 0}
-	if err := json.NewEncoder(ind).Encode(index); err != nil {
-		w.logger.Warn("unable to encode data", "error", err, "line", index)
+	err := newIndexEncoder(w.indexWriter).Encode(k, off)
+	if err != nil {
+		w.logger.Warn("unable to encode data", "error", err)
 	}
 }
 
