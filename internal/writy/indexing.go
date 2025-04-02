@@ -1,11 +1,6 @@
 package writy
 
 import (
-	"bufio"
-	"encoding/json"
-	"fmt"
-	"io"
-	"strconv"
 	"sync"
 )
 
@@ -29,26 +24,12 @@ func writeIndex(w *Writy, k string, v any) {
 }
 
 func searchIndexByKey(w *Writy, k string) int64 {
-	lk.RLock()
-	defer lk.RUnlock()
-
-	w.indexReader.Seek(0, io.SeekStart)
-	scanner := bufio.NewScanner(bufio.NewReader(w.indexReader))
-
-	for scanner.Scan() {
-		var indLine []any
-		if err := json.Unmarshal(scanner.Bytes(), &indLine); err != nil {
-			w.logger.Debug("unable to decode index line", "error", err, "line", scanner.Text())
-			continue
-		}
-
-		fkey := fmt.Sprint(indLine[INDEX_KEY])
-		foff, _ := strconv.ParseInt(fmt.Sprint(indLine[INDEX_OFFSET]), 0, 64)
-		isDel, _ := strconv.ParseBool(fmt.Sprint(indLine[INDEX_IS_DELETED]))
-
-		if !isDel && k == fkey {
-			w.logger.Debug("found offset", "fkey", fkey, "k", k, "isdel", isDel, "offset", foff)
-			return foff
+	indDec := newIndexDecoder(w.indexReader, w.logger)
+	for indDec.Scan() {
+		ind := indDec.Decode()
+		if !ind.IsDeleted && k == ind.Key {
+			w.logger.Debug("found offset", "fkey", ind.Key, "k", k, "isdel", ind.IsDeleted, "offset", ind.Offset)
+			return ind.Offset
 		}
 	}
 

@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log/slog"
 	"os"
 	"strconv"
 )
@@ -71,4 +72,49 @@ func (s indexEncoder) Encode(key string, offset int64) error {
 
 	index := []any{key, offset, 0}
 	return json.NewEncoder(s.f).Encode(index)
+}
+
+type index struct {
+	Key       string
+	Offset    int64
+	IsDeleted bool
+}
+
+type indexDecoder struct {
+	f      *os.File
+	scnr   *bufio.Scanner
+	logger *slog.Logger
+}
+
+func newIndexDecoder(f *os.File, l *slog.Logger) *indexDecoder {
+	f.Seek(0, io.SeekStart)
+	scnr := bufio.NewScanner(bufio.NewReader(f))
+	return &indexDecoder{f: f, scnr: scnr, logger: l}
+}
+
+func (s indexDecoder) Decode() index {
+	lk.RLock()
+	defer lk.RUnlock()
+
+	var indexLine []any
+	err := json.Unmarshal(s.scnr.Bytes(), &indexLine)
+	if err != nil {
+		s.logger.Warn("failed to unmarshal line", "error", err)
+	}
+
+	fkey := fmt.Sprint(indexLine[INDEX_KEY])
+	foff, err := strconv.ParseInt(fmt.Sprint(indexLine[INDEX_OFFSET]), 0, 64)
+	if err != nil {
+		s.logger.Warn("failed to parse int", "error", err)
+	}
+	isDel, err := strconv.ParseBool(fmt.Sprint(indexLine[INDEX_IS_DELETED]))
+	if err != nil {
+		s.logger.Warn("failed to parse bool", "error", err)
+	}
+
+	return index{Key: fkey, Offset: foff, IsDeleted: isDel}
+}
+
+func (s indexDecoder) Scan() bool {
+	return s.scnr.Scan()
 }
