@@ -9,11 +9,9 @@ import (
 )
 
 func TestCache(t *testing.T) {
-	c := cache.New().SetLogHandler(slog.NewJSONHandler(
-		os.Stderr,
-		&slog.HandlerOptions{Level: slog.LevelDebug},
-	))
+	cache.SetLogger(slog.New(slog.NewJSONHandler(os.Stderr, &slog.HandlerOptions{Level: slog.LevelDebug})))
 
+	c := cache.New()
 	err := c.Set("name", "ali")
 	if err != nil {
 		t.Error("error in first write to cache:", err)

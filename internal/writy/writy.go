@@ -3,7 +3,6 @@ package writy
 import (
 	"fmt"
 	"io"
-	"log/slog"
 	"os"
 	"path/filepath"
 	"time"
@@ -19,7 +18,6 @@ var (
 )
 
 type Writy struct {
-	logger        *slog.Logger
 	storageReader *os.File
 	storageWriter *os.File
 	indexReader   *os.File
@@ -64,19 +62,10 @@ func New(path string, exp time.Duration) (*Writy, error) {
 		flusher:       NewFlusher(exp),
 		cache:         cache.New(),
 	}
-	w.SetLogHandler(slog.Default().Handler())
 
 	w.flusher.Run(w)
 
 	return w, nil
-}
-
-func (w *Writy) SetLogHandler(handler slog.Handler) *Writy {
-	w.logger = slog.New(handler)
-	w.flusher.logger = w.logger
-	w.cache.SetLogHandler(handler)
-	w.logger.Debug("enable logger")
-	return w
 }
 
 // NOTE: In this version our goal is performance.
@@ -89,13 +78,13 @@ func (w Writy) Set(key, value string) error {
 func (w Writy) Get(key string) (any, error) {
 	v, err := w.cache.Get(key)
 	if !cache.IsNotFound(err) {
-		w.logger.Debug("cache: key found", "key", key, "value", v, "err", err)
+		logger.Debug("cache: key found", "key", key, "value", v, "err", err)
 		return v, nil
 	}
 
 	off := searchIndexByKey(&w, key)
 	if off < 0 {
-		w.logger.Debug("index: key found", "key", key, "value", v, "err", err)
+		logger.Debug("index: key found", "key", key, "value", v, "err", err)
 		return nil, notfoundError{}
 	}
 
