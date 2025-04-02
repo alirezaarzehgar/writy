@@ -17,7 +17,7 @@ func searchIndexByKey(w *Writy, k string) int64 {
 	for indDec.Scan() {
 		ind := indDec.Decode()
 		if !ind.IsDeleted && k == ind.Key {
-			return ind.Offset
+			return ind.ValueOffset
 		}
 	}
 	return -1

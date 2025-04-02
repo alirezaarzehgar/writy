@@ -3,6 +3,7 @@ package writy
 import (
 	"fmt"
 	"io"
+	"log/slog"
 	"os"
 	"path/filepath"
 	"time"
@@ -32,7 +33,7 @@ func New(path string, exp time.Duration) (*Writy, error) {
 	}
 
 	storagePath := filepath.Join(path, "storage.db")
-	sWriter, err := os.OpenFile(storagePath, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0644)
+	sWriter, err := os.OpenFile(storagePath, os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
 		return nil, fmt.Errorf("unable open file %s for writing: %w", path, err)
 	}
@@ -44,10 +45,11 @@ func New(path string, exp time.Duration) (*Writy, error) {
 	}
 
 	indexPath := filepath.Join(path, "index.db")
-	iWriter, err := os.OpenFile(indexPath, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0644)
+	iWriter, err := os.OpenFile(indexPath, os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
 		return nil, fmt.Errorf("unable open file %s for writing: %w", path, err)
 	}
+	iWriter.Seek(0, io.SeekEnd)
 
 	iReader, err := os.Open(indexPath)
 	if err != nil {
@@ -92,6 +94,16 @@ func (w Writy) Get(key string) any {
 }
 
 func (w Writy) Del(key string) error {
+	indDec := newIndexDecoder(w.indexReader)
+	indEnc := newIndexEncoder(w.indexWriter)
+	for indDec.Scan() {
+		ind := indDec.Decode()
+		if !ind.IsDeleted && key == ind.Key {
+			slog.Debug("index found", "index", ind)
+			return indEnc.Delete(ind.NextIndexOffset)
+		}
+	}
+
 	return nil
 }
 

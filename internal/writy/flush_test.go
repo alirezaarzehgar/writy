@@ -74,3 +74,7 @@ func BenchmarkWrityGet(b *testing.B) {
 		}
 	}
 }
+
+func TestDeleteData(t *testing.T) {
+	t.Log("delete key", w.Del("key-2"))
+}
