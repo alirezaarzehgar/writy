@@ -51,14 +51,13 @@ func TestSearchIndexByKey(t *testing.T) {
 func TestGetValueByOffset(t *testing.T) {
 	for i := 0; i < 10; i++ {
 		key := fmt.Sprint("key-", i)
-		v, err := w.cache.Get(key)
-		if err == nil {
+		v := w.cache.Get(key)
+		if v != nil {
 			t.Error(key, "already exists in cache:", v)
 			t.Log(w.cache.List())
 		}
-		t.Log(key, " is not in the cache:", err)
 
-		v, err = w.Get(key)
+		v, err := w.Get(key)
 		if err != nil {
 			t.Error(key, " is not found:", err)
 		}

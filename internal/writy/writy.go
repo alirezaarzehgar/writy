@@ -76,9 +76,9 @@ func (w Writy) Set(key string, value any) error {
 }
 
 func (w Writy) Get(key string) (any, error) {
-	v, err := w.cache.Get(key)
-	if !cache.IsNotFound(err) {
-		return v, nil
+	value := w.cache.Get(key)
+	if value != nil {
+		return value, nil
 	}
 
 	off := searchIndexByKey(&w, key)
@@ -86,9 +86,9 @@ func (w Writy) Get(key string) (any, error) {
 		return nil, notfoundError{}
 	}
 
-	v = getValueByOffset(&w, off)
-	w.cache.ForceSet(key, v)
-	return v, nil
+	value = getValueByOffset(&w, off)
+	w.cache.ForceSet(key, value)
+	return value, nil
 }
 
 func (w Writy) Del(key string) error {

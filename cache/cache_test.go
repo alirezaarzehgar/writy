@@ -17,8 +17,8 @@ func TestCache(t *testing.T) {
 		t.Error("error in first write to cache:", err)
 	}
 
-	v, err := c.Get("name")
-	if err != nil {
+	v := c.Get("name")
+	if v == nil {
 		t.Error("error in first read from cache:", err)
 	}
 	if v != "ali" {
