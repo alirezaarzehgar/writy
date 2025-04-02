@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log/slog"
 	"os"
 	"strconv"
 	"sync"
@@ -107,17 +108,17 @@ func (s indexDecoder) Decode() index {
 	var indexLine []any
 	err := json.Unmarshal(s.scnr.Bytes(), &indexLine)
 	if err != nil {
-		logger.Warn("failed to unmarshal line", "error", err)
+		slog.Warn("failed to unmarshal line", "error", err)
 	}
 
 	fkey := fmt.Sprint(indexLine[IndexKey])
 	foff, err := strconv.ParseInt(fmt.Sprint(indexLine[IndexOffset]), 0, 64)
 	if err != nil {
-		logger.Warn("failed to parse int", "error", err)
+		slog.Warn("failed to parse int", "error", err)
 	}
 	isDel, err := strconv.ParseBool(fmt.Sprint(indexLine[IndexIsDeleted]))
 	if err != nil {
-		logger.Warn("failed to parse bool", "error", err)
+		slog.Warn("failed to parse bool", "error", err)
 	}
 
 	return index{Key: fkey, Offset: foff, IsDeleted: isDel}

@@ -1,6 +1,7 @@
 package writy
 
 import (
+	"log/slog"
 	"time"
 )
 
@@ -22,7 +23,7 @@ func (f *Flusher) Run(w *Writy) {
 	f.writy = w
 
 	go func() {
-		logger.Debug("start filesystem flusher")
+		slog.Debug("start filesystem flusher")
 		for f.running {
 			select {
 			case <-time.NewTicker(f.cycle).C:

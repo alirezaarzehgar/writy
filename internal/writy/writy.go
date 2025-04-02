@@ -3,6 +3,7 @@ package writy
 import (
 	"fmt"
 	"io"
+	"log/slog"
 	"os"
 	"path/filepath"
 	"time"
@@ -78,13 +79,13 @@ func (w Writy) Set(key, value string) error {
 func (w Writy) Get(key string) (any, error) {
 	v, err := w.cache.Get(key)
 	if !cache.IsNotFound(err) {
-		logger.Debug("cache: key found", "key", key, "value", v, "err", err)
+		slog.Debug("cache: key found", "key", key, "value", v, "err", err)
 		return v, nil
 	}
 
 	off := searchIndexByKey(&w, key)
 	if off < 0 {
-		logger.Debug("index: key found", "key", key, "value", v, "err", err)
+		slog.Debug("index: key found", "key", key, "value", v, "err", err)
 		return nil, notfoundError{}
 	}
 

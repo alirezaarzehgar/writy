@@ -11,7 +11,7 @@ import (
 var w *Writy
 
 func TestFlush(t *testing.T) {
-	SetLogger(slog.New(slog.NewJSONHandler(os.Stderr, &slog.HandlerOptions{Level: slog.LevelDebug})))
+	slog.SetDefault(slog.New(slog.NewJSONHandler(os.Stderr, &slog.HandlerOptions{Level: slog.LevelDebug})))
 
 	var err error
 	w, err = New(".", time.Second)

@@ -9,7 +9,7 @@ import (
 )
 
 func TestCache(t *testing.T) {
-	cache.SetLogger(slog.New(slog.NewJSONHandler(os.Stderr, &slog.HandlerOptions{Level: slog.LevelDebug})))
+	slog.SetDefault(slog.New(slog.NewJSONHandler(os.Stderr, &slog.HandlerOptions{Level: slog.LevelDebug})))
 
 	c := cache.New()
 	err := c.Set("name", "ali")
