@@ -8,7 +8,10 @@ import (
 	"log/slog"
 	"os"
 	"strconv"
+	"sync"
 )
+
+var lk sync.RWMutex
 
 type storageDecoder struct {
 	f *os.File

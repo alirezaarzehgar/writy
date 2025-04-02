@@ -1,11 +1,5 @@
 package writy
 
-import (
-	"sync"
-)
-
-var lk sync.RWMutex
-
 // TODO: Redesign this and find efficient way for writing may lines once.
 // This implementation is not performant.
 func writeIndex(w *Writy, k string, v any) {
