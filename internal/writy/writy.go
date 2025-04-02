@@ -83,10 +83,6 @@ func (w *Writy) SetLogHandler(handler slog.Handler) *Writy {
 // Checking fs for duplication is not suitable for us.
 // Initial solution is ignoring duplicated records when flushing.
 func (w Writy) Set(key, value string) error {
-	return w.ForceSet(key, value)
-}
-
-func (w Writy) ForceSet(key string, value any) error {
 	return w.cache.ForceSet(key, value)
 }
 

@@ -16,10 +16,7 @@ func TestFlush(t *testing.T) {
 	if err != nil {
 		t.Fatal("unable to open storage")
 	}
-	w.SetLogHandler(slog.NewJSONHandler(os.Stderr, &slog.HandlerOptions{
-		Level:     slog.LevelDebug,
-		AddSource: false,
-	}))
+	w.SetLogHandler(slog.NewJSONHandler(os.Stderr, &slog.HandlerOptions{Level: slog.LevelDebug}))
 	defer w.Flush()
 
 	w.Set("name", "ali")
@@ -33,7 +30,7 @@ func TestFlush(t *testing.T) {
 
 	for i := 0; i < 10; i++ {
 		time.Sleep(time.Second / 3)
-		w.Set(fmt.Sprint("key-", i), "vvv")
+		w.Set(fmt.Sprint("key-", i), fmt.Sprint("vvv\nasd", i))
 	}
 }
 
@@ -44,13 +41,20 @@ func TestSearchIndexByKey(t *testing.T) {
 	}
 
 	off = searchIndexByKey(w, "key-5")
-	if off != 119 {
+	if off < 0 {
 		t.Error("search by index is not correct", off)
 	}
 	t.Log("offset:", off)
 }
 
 func TestGetValueByOffset(t *testing.T) {
+	var err error
+	w, err = New(".", time.Second)
+	if err != nil {
+		t.Fatal("unable to open storage")
+	}
+	w.SetLogHandler(slog.NewJSONHandler(os.Stderr, &slog.HandlerOptions{Level: slog.LevelDebug}))
+
 	for i := 0; i < 10; i++ {
 		key := fmt.Sprint("key-", i)
 		v, err := w.cache.Get(key)

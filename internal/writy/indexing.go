@@ -10,10 +10,6 @@ import (
 )
 
 const (
-	// storage data: ["key", "value"]
-	STORAGE_KEY   = 0
-	STORAGE_VALUE = 1
-
 	// index data: ["key", offset, is_deleted]
 	INDEX_KEY        = 0
 	INDEX_OFFSET     = 1
@@ -43,13 +39,13 @@ func writeIndex(w *Writy, k string, v any) {
 		w.logger.Warn("unable to get current offset", "error", err)
 	}
 
-	l := []any{k, string(byteValue)}
-	if err := json.NewEncoder(storage).Encode(l); err != nil {
-		w.logger.Warn("unable to encode data", "error", err, "line", l)
+	line := strconv.Quote(string(byteValue)) + "\n"
+	if _, err := storage.WriteString(line); err != nil {
+		w.logger.Warn("unable to encode data", "error", err, "line", line)
 	}
-	i := []any{k, off, 0}
-	if err := json.NewEncoder(ind).Encode(i); err != nil {
-		w.logger.Warn("unable to encode data", "error", err, "line", i)
+	index := []any{k, off, 0}
+	if err := json.NewEncoder(ind).Encode(index); err != nil {
+		w.logger.Warn("unable to encode data", "error", err, "line", index)
 	}
 }
 
@@ -81,22 +77,12 @@ func searchIndexByKey(w *Writy, k string) int64 {
 }
 
 func getValueByOffset(w *Writy, off int64) any {
-	off, err := w.storageReader.Seek(off, io.SeekCurrent)
+	s := newSerilizer(w.storageReader)
+	line, err := s.Read(off)
 	if err != nil {
-		w.logger.Debug("unable seek to off position", "error", err, "offset", off)
-		return nil
+		w.logger.Warn("failed to read storage", "offset", off, "error", err)
 	}
 
-	scanner := bufio.NewScanner(bufio.NewReader(w.storageReader))
-	scanner.Scan()
-
-	var storLine []string
-	if err := json.Unmarshal(scanner.Bytes(), &storLine); err != nil {
-		w.logger.Debug("failed to unmarshal storage line",
-			"offset", off, "error", err, "line", scanner.Text())
-		return nil
-	}
-
-	w.logger.Debug("desirable line found", "line", storLine)
-	return storLine[STORAGE_VALUE]
+	w.logger.Debug("desirable line found", "line", line, "error", err)
+	return line
 }
