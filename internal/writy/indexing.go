@@ -21,28 +21,10 @@ var lk sync.RWMutex
 // TODO: Redesign this and find efficient way for writing may lines once.
 // This implementation is not performant.
 func writeIndex(w *Writy, k string, v any) {
-	storage := w.storageWriter
 	ind := w.indexWriter
 
-	byteValue, err := json.Marshal(v)
-	if err != nil {
-		w.logger.Debug("can not marshal value", "error", err)
-		return
-	}
-	w.logger.Debug("write to fs", "key", k, "value", v)
+	off := newStorageEncoder(w.storageWriter).Encode(k, v)
 
-	lk.Lock()
-	defer lk.Unlock()
-
-	off, err := storage.Seek(0, io.SeekCurrent)
-	if err != nil {
-		w.logger.Warn("unable to get current offset", "error", err)
-	}
-
-	line := strconv.Quote(string(byteValue)) + "\n"
-	if _, err := storage.WriteString(line); err != nil {
-		w.logger.Warn("unable to encode data", "error", err, "line", line)
-	}
 	index := []any{k, off, 0}
 	if err := json.NewEncoder(ind).Encode(index); err != nil {
 		w.logger.Warn("unable to encode data", "error", err, "line", index)
@@ -77,8 +59,8 @@ func searchIndexByKey(w *Writy, k string) int64 {
 }
 
 func getValueByOffset(w *Writy, off int64) any {
-	s := newSerilizer(w.storageReader)
-	line, err := s.Read(off)
+	s := newStorageDecoder(w.storageReader)
+	line, err := s.Decode(off)
 	if err != nil {
 		w.logger.Warn("failed to read storage", "offset", off, "error", err)
 	}

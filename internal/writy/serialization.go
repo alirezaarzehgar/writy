@@ -2,26 +2,27 @@ package writy
 
 import (
 	"bufio"
+	"fmt"
 	"io"
 	"os"
 	"strconv"
 )
 
-type serializaer struct {
-	fileReader *os.File
+type storageDecoder struct {
+	f *os.File
 }
 
-func newSerilizer(f *os.File) *serializaer {
-	return &serializaer{fileReader: f}
+func newStorageDecoder(f *os.File) *storageDecoder {
+	return &storageDecoder{f: f}
 }
 
-func (s serializaer) Read(off int64) (any, error) {
+func (s storageDecoder) Decode(off int64) (any, error) {
 	lk.RLock()
 	defer lk.RUnlock()
 
-	s.fileReader.Seek(off, io.SeekStart)
+	s.f.Seek(off, io.SeekStart)
 
-	reader := bufio.NewReader(s.fileReader)
+	reader := bufio.NewReader(s.f)
 	line, err := reader.ReadString('\n')
 	if err != nil {
 		return nil, err
@@ -35,4 +36,22 @@ func (s serializaer) Read(off int64) (any, error) {
 	}
 
 	return line, err
+}
+
+type storageEncoder struct {
+	f *os.File
+}
+
+func newStorageEncoder(f *os.File) *storageEncoder {
+	return &storageEncoder{f: f}
+}
+
+func (s storageEncoder) Encode(key string, value any) int64 {
+	lk.Lock()
+	defer lk.Unlock()
+
+	line := strconv.Quote(fmt.Sprint(value)) + "\n"
+	s.f.WriteString(line)
+	offset, _ := s.f.Seek(0, io.SeekCurrent)
+	return offset
 }
