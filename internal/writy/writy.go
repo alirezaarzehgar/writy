@@ -3,7 +3,6 @@ package writy
 import (
 	"fmt"
 	"io"
-	"log/slog"
 	"os"
 	"path/filepath"
 	"time"
@@ -72,24 +71,24 @@ func New(path string, exp time.Duration) (*Writy, error) {
 // NOTE: In this version our goal is performance.
 // Checking fs for duplication is not suitable for us.
 // Initial solution is ignoring duplicated records when flushing.
-func (w Writy) Set(key, value string) error {
+func (w Writy) Set(key string, value any) error {
 	return w.cache.ForceSet(key, value)
 }
 
 func (w Writy) Get(key string) (any, error) {
 	v, err := w.cache.Get(key)
 	if !cache.IsNotFound(err) {
-		slog.Debug("cache: key found", "key", key, "value", v, "err", err)
 		return v, nil
 	}
 
 	off := searchIndexByKey(&w, key)
 	if off < 0 {
-		slog.Debug("index: key found", "key", key, "value", v, "err", err)
 		return nil, notfoundError{}
 	}
 
-	return getValueByOffset(&w, off), nil
+	v = getValueByOffset(&w, off)
+	w.cache.ForceSet(key, v)
+	return v, nil
 }
 
 func (w Writy) Del(key string) error {

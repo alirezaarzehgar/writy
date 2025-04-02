@@ -49,12 +49,6 @@ func TestSearchIndexByKey(t *testing.T) {
 }
 
 func TestGetValueByOffset(t *testing.T) {
-	var err error
-	w, err = New(".", time.Second)
-	if err != nil {
-		t.Fatal("unable to open storage")
-	}
-
 	for i := 0; i < 10; i++ {
 		key := fmt.Sprint("key-", i)
 		v, err := w.cache.Get(key)
@@ -69,5 +63,16 @@ func TestGetValueByOffset(t *testing.T) {
 			t.Error(key, " is not found:", err)
 		}
 		t.Log(key, " value:", v, ", error:", err)
+	}
+}
+
+func BenchmarkWrityGet(b *testing.B) {
+	slog.SetDefault(slog.New(slog.NewJSONHandler(os.Stderr, &slog.HandlerOptions{})))
+
+	for i := 0; i < b.N; i++ {
+		_, err := w.Get("key-5")
+		if err != nil {
+			b.Fatal("benchmark failed. error:", err)
+		}
 	}
 }

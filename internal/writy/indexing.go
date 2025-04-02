@@ -17,11 +17,9 @@ func searchIndexByKey(w *Writy, k string) int64 {
 	for indDec.Scan() {
 		ind := indDec.Decode()
 		if !ind.IsDeleted && k == ind.Key {
-			slog.Debug("found offset", "fkey", ind.Key, "k", k, "isdel", ind.IsDeleted, "offset", ind.Offset)
 			return ind.Offset
 		}
 	}
-
 	return -1
 }
 
@@ -32,6 +30,5 @@ func getValueByOffset(w *Writy, off int64) any {
 		slog.Warn("failed to read storage", "offset", off, "error", err)
 	}
 
-	slog.Debug("desirable line found", "line", line, "error", err)
 	return line
 }
