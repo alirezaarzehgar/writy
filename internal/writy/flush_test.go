@@ -14,7 +14,7 @@ func TestFlush(t *testing.T) {
 	slog.SetDefault(slog.New(slog.NewJSONHandler(os.Stderr, &slog.HandlerOptions{Level: slog.LevelDebug})))
 
 	var err error
-	w, err = New(".", time.Second)
+	w, err = New("/tmp", time.Second)
 	if err != nil {
 		t.Fatal("unable to open storage")
 	}
