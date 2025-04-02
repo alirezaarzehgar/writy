@@ -23,7 +23,7 @@ func TestFlush(t *testing.T) {
 	w.Set("name", "ali")
 	t.Log("ali saved in name")
 
-	v, _ := w.Get("name")
+	v := w.Get("name")
 	if v != "ali" {
 		t.Error("saved key not found")
 	}
@@ -57,11 +57,10 @@ func TestGetValueByOffset(t *testing.T) {
 			t.Log(w.cache.List())
 		}
 
-		v, err := w.Get(key)
-		if err != nil {
-			t.Error(key, " is not found:", err)
+		v = w.Get(key)
+		if v == nil {
+			t.Error("not found:", key)
 		}
-		t.Log(key, " value:", v, ", error:", err)
 	}
 }
 
@@ -69,9 +68,9 @@ func BenchmarkWrityGet(b *testing.B) {
 	slog.SetDefault(slog.New(slog.NewJSONHandler(os.Stderr, &slog.HandlerOptions{})))
 
 	for i := 0; i < b.N; i++ {
-		_, err := w.Get("key-5")
-		if err != nil {
-			b.Fatal("benchmark failed. error:", err)
+		v := w.Get("key-5")
+		if v == nil {
+			b.Fatal("not found: key-5")
 		}
 	}
 }
