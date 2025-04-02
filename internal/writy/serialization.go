@@ -80,6 +80,13 @@ type index struct {
 	IsDeleted bool
 }
 
+const (
+	// index data: ["key", offset, is_deleted]
+	IndexKey       = 0
+	IndexOffset    = 1
+	IndexIsDeleted = 2
+)
+
 type indexDecoder struct {
 	f      *os.File
 	scnr   *bufio.Scanner
@@ -102,12 +109,12 @@ func (s indexDecoder) Decode() index {
 		s.logger.Warn("failed to unmarshal line", "error", err)
 	}
 
-	fkey := fmt.Sprint(indexLine[INDEX_KEY])
-	foff, err := strconv.ParseInt(fmt.Sprint(indexLine[INDEX_OFFSET]), 0, 64)
+	fkey := fmt.Sprint(indexLine[IndexKey])
+	foff, err := strconv.ParseInt(fmt.Sprint(indexLine[IndexOffset]), 0, 64)
 	if err != nil {
 		s.logger.Warn("failed to parse int", "error", err)
 	}
-	isDel, err := strconv.ParseBool(fmt.Sprint(indexLine[INDEX_IS_DELETED]))
+	isDel, err := strconv.ParseBool(fmt.Sprint(indexLine[IndexIsDeleted]))
 	if err != nil {
 		s.logger.Warn("failed to parse bool", "error", err)
 	}

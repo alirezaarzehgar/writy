@@ -4,13 +4,6 @@ import (
 	"sync"
 )
 
-const (
-	// index data: ["key", offset, is_deleted]
-	INDEX_KEY        = 0
-	INDEX_OFFSET     = 1
-	INDEX_IS_DELETED = 2
-)
-
 var lk sync.RWMutex
 
 // TODO: Redesign this and find efficient way for writing may lines once.
