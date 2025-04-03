@@ -107,9 +107,13 @@ func (w Writy) Del(key string) error {
 	return nil
 }
 
-func (w Writy) List() (StorageType, error) {
-	// Append cache to fs
-	return nil, nil
+func (w Writy) Keys() (keys []string) {
+	indDec := newIndexDecoder(w.indexReader)
+	for indDec.Scan() {
+		key := indDec.Decode().Key
+		keys = append(keys, key)
+	}
+	return
 }
 
 func (w Writy) Flush() {

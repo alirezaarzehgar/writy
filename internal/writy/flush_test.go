@@ -78,3 +78,7 @@ func BenchmarkWrityGet(b *testing.B) {
 func TestDeleteData(t *testing.T) {
 	t.Log("delete key", w.Del("key-2"))
 }
+
+func TestKeys(t *testing.T) {
+	t.Log("keys", w.Keys())
+}
