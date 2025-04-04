@@ -7,7 +7,6 @@ import (
 	"os"
 	"path/filepath"
 	"sync"
-	"time"
 
 	"github.com/alirezaarzehgar/writy/cache"
 )
@@ -17,8 +16,7 @@ var glk sync.RWMutex
 type StorageType map[string]any
 
 var (
-	DefaultStoragePath string        = fmt.Sprintf("%s", os.Getenv("HOME"))
-	DefaultFlushCycle  time.Duration = time.Second * 5
+	DefaultStoragePath string = filepath.Join(os.Getenv("HOME"), ".cache")
 )
 
 type Writy struct {
@@ -66,7 +64,7 @@ func New(path string) (*Writy, error) {
 		storageWriter: sWriter,
 		indexReader:   iReader,
 		indexWriter:   iWriter,
-		flusher:       newFlusher(DefaultFlushCycle),
+		flusher:       newFlusher(),
 		gc:            newGarbageCollector(),
 		cache:         cache.New(),
 		w8ForDaemons:  &sync.WaitGroup{},

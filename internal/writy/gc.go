@@ -7,7 +7,7 @@ import (
 )
 
 var (
-	DefaultGarbageCollectorCycle = time.Second * 1
+	DefaultGarbageCollectorCycle = time.Second * 15
 )
 
 type GarbageCollector struct {
@@ -38,11 +38,13 @@ func (gc *GarbageCollector) Run(w *Writy, flusher *Flusher) {
 	gc.stw = storTmpWriter
 
 	go func() {
+		slog.Debug("run garbage collector")
 		for {
-			slog.Debug("run garbage collector")
 			select {
 			case <-time.NewTicker(DefaultGarbageCollectorCycle).C:
-				flusher.flush()
+				if len(w.cache.List()) > 0 {
+					flusher.flush()
+				}
 				gc.collect()
 				gc.writy.w8ForDaemons.Wait()
 			}
@@ -72,8 +74,6 @@ func (gc *GarbageCollector) collect() {
 			ienc.Encode(i.Key, i.ValueOffset)
 			v, _ := sdec.Decode(i.ValueOffset)
 			senc.Encode(i.Key, v)
-		} else {
-			slog.Debug("ignoring delelted row", "data", i)
 		}
 	}
 

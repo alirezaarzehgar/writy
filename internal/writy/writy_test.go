@@ -36,7 +36,6 @@ func TestFlush(t *testing.T) {
 		w.Set(fmt.Sprint("key-", i), fmt.Sprint("vvv\nasd", i))
 	}
 	w.Cleanup()
-	// os.Exit(1)
 }
 
 func TestSearchIndexByKey(t *testing.T) {

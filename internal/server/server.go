@@ -2,38 +2,76 @@ package server
 
 import (
 	"context"
+	"fmt"
+	"net"
 
+	"github.com/alirezaarzehgar/writy/internal/writy"
 	"github.com/alirezaarzehgar/writy/libwrity"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
+	"google.golang.org/grpc/reflection"
 )
 
 type WrityService struct {
+	writy *writy.Writy
 	libwrity.UnimplementedWrityServiceServer
 }
 
-func (WrityService) Set(context.Context, *libwrity.SetRequest) (*libwrity.Empty, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Set not implemented")
+func (ws *WrityService) Set(c context.Context, r *libwrity.SetRequest) (*libwrity.Empty, error) {
+	return &libwrity.Empty{}, ws.writy.Set(r.Key, r.Value)
 }
 
-func (WrityService) Get(context.Context, *libwrity.GetRequest) (*libwrity.GetResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Get not implemented")
+func (ws *WrityService) Get(c context.Context, r *libwrity.GetRequest) (*libwrity.GetResponse, error) {
+	v := ws.writy.Get(r.Key)
+	if v == nil {
+		return nil, fmt.Errorf("not found: %s", r.Key)
+	}
+	return &libwrity.GetResponse{Value: fmt.Sprint(v)}, nil
 }
 
-func (WrityService) Del(context.Context, *libwrity.DelRequest) (*libwrity.Empty, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Del not implemented")
+func (ws *WrityService) Del(c context.Context, r *libwrity.DelRequest) (*libwrity.Empty, error) {
+	return &libwrity.Empty{}, ws.writy.Del(r.Key)
 }
 
-func (WrityService) Keys(context.Context, *libwrity.KeysRequest) (*libwrity.KeysResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Keys not implemented")
+func (ws *WrityService) Keys(c context.Context, r *libwrity.KeysRequest) (*libwrity.KeysResponse, error) {
+	keys := ws.writy.Keys()
+	if keys == nil {
+		return nil, fmt.Errorf("storage is empty now")
+	}
+	return &libwrity.KeysResponse{Keys: keys}, nil
 }
 
-func (WrityService) Flush(context.Context, *libwrity.Empty) (*libwrity.Empty, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Flush not implemented")
+func (ws *WrityService) Flush(c context.Context, r *libwrity.Empty) (*libwrity.Empty, error) {
+	ws.writy.Cleanup()
+	return &libwrity.Empty{}, nil
 }
 
-func New() {
+type ServerConfig struct {
+	DbPath, RunningAddr string
+	ReflectionEnabled   bool
+}
+
+func Start(conf ServerConfig) error {
 	s := grpc.NewServer()
-	libwrity.RegisterWrityServiceServer(s, &WrityService{})
+
+	w, err := writy.New(conf.DbPath)
+	if err != nil {
+		return fmt.Errorf("failed to create writy instalce: %w", err)
+	}
+
+	libwrity.RegisterWrityServiceServer(s, &WrityService{writy: w})
+	if conf.ReflectionEnabled {
+		reflection.Register(s)
+	}
+
+	l, err := net.Listen("tcp", conf.RunningAddr)
+	if err != nil {
+		return fmt.Errorf("failed to create tcp connection: %w", err)
+	}
+
+	err = s.Serve(l)
+	if err != nil {
+		return fmt.Errorf("failed to serve gRPC connection: %w", err)
+	}
+
+	return nil
 }

@@ -5,18 +5,17 @@ import (
 	"time"
 )
 
+var (
+	DefaultFlushCycle time.Duration = time.Second * 5
+)
+
 type Flusher struct {
 	running bool
-	cycle   time.Duration
 	writy   *Writy
 }
 
-func newFlusher(cycle time.Duration) *Flusher {
-	return &Flusher{cycle: cycle, running: true}
-}
-
-func (f *Flusher) SetCycle(c time.Duration) {
-	f.cycle = c
+func newFlusher() *Flusher {
+	return &Flusher{running: true}
 }
 
 func (f *Flusher) Run(w *Writy) {
@@ -26,7 +25,7 @@ func (f *Flusher) Run(w *Writy) {
 		slog.Debug("start filesystem flusher")
 		for f.running {
 			select {
-			case <-time.NewTicker(f.cycle).C:
+			case <-time.NewTicker(DefaultFlushCycle).C:
 				f.flush()
 			}
 		}
@@ -36,6 +35,7 @@ func (f *Flusher) Run(w *Writy) {
 func (f *Flusher) flush() {
 	glk.Lock()
 	f.writy.w8ForDaemons.Add(1)
+	slog.Debug("flush cache to filesystem")
 
 	for k, v := range f.writy.cache.List() {
 		if searchIndexByKey(f.writy, k) < 0 {
