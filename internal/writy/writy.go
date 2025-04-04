@@ -27,7 +27,7 @@ type Writy struct {
 	cache         *cache.Cache
 }
 
-func New(path string, exp time.Duration) (*Writy, error) {
+func New(path string) (*Writy, error) {
 	if path == "" {
 		path = DefaultStoragePath
 	}
@@ -61,7 +61,7 @@ func New(path string, exp time.Duration) (*Writy, error) {
 		storageWriter: sWriter,
 		indexReader:   iReader,
 		indexWriter:   iWriter,
-		flusher:       NewFlusher(exp),
+		flusher:       newFlusher(DefaultFlushCycle),
 		cache:         cache.New(),
 	}
 
@@ -94,6 +94,8 @@ func (w Writy) Get(key string) any {
 }
 
 func (w Writy) Del(key string) error {
+	w.cache.Del(key)
+
 	indDec := newIndexDecoder(w.indexReader)
 	indEnc := newIndexEncoder(w.indexWriter)
 	for indDec.Scan() {
@@ -110,13 +112,14 @@ func (w Writy) Del(key string) error {
 func (w Writy) Keys() (keys []string) {
 	indDec := newIndexDecoder(w.indexReader)
 	for indDec.Scan() {
-		key := indDec.Decode().Key
-		keys = append(keys, key)
+		ind := indDec.Decode()
+		if !ind.IsDeleted {
+			keys = append(keys, ind.Key)
+		}
 	}
 	return
 }
 
-func (w Writy) Flush() {
+func (w Writy) Cleanup() {
 	w.flusher.flush()
-	return
 }

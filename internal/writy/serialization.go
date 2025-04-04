@@ -73,6 +73,7 @@ func (s indexEncoder) Encode(key string, offset int64) error {
 	lk.Lock()
 	defer lk.Unlock()
 
+	slog.Debug("index.Encoder: encode index", "key", key, "offset", offset)
 	index := []any{key, offset, 0}
 	return json.NewEncoder(s.f).Encode(index)
 }

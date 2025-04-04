@@ -5,18 +5,32 @@ import (
 
 	"github.com/alirezaarzehgar/writy/libwrity"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 type WrityService struct {
 	libwrity.UnimplementedWrityServiceServer
 }
 
-func (w WrityService) Get(c context.Context, req *libwrity.GetRequest) (*libwrity.GetResponse, error) {
-	return nil, nil
+func (WrityService) Set(context.Context, *libwrity.SetRequest) (*libwrity.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Set not implemented")
 }
 
-func (w WrityService) Set(c context.Context, req *libwrity.SetRequest) (*libwrity.SetResponse, error) {
-	return nil, nil
+func (WrityService) Get(context.Context, *libwrity.GetRequest) (*libwrity.GetResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Get not implemented")
+}
+
+func (WrityService) Del(context.Context, *libwrity.DelRequest) (*libwrity.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Del not implemented")
+}
+
+func (WrityService) Keys(context.Context, *libwrity.KeysRequest) (*libwrity.KeysResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Keys not implemented")
+}
+
+func (WrityService) Flush(context.Context, *libwrity.Empty) (*libwrity.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Flush not implemented")
 }
 
 func New() {

@@ -13,12 +13,14 @@ var w *Writy
 func TestFlush(t *testing.T) {
 	slog.SetDefault(slog.New(slog.NewJSONHandler(os.Stderr, &slog.HandlerOptions{Level: slog.LevelDebug})))
 
+	DefaultFlushCycle = time.Second
+
 	var err error
-	w, err = New("/tmp", time.Second)
+	w, err = New("/tmp")
 	if err != nil {
 		t.Fatal("unable to open storage")
 	}
-	defer w.Flush()
+	defer w.Cleanup()
 
 	w.Set("name", "ali")
 	t.Log("ali saved in name")
@@ -75,10 +77,7 @@ func BenchmarkWrityGet(b *testing.B) {
 	}
 }
 
-func TestDeleteData(t *testing.T) {
-	t.Log("delete key", w.Del("key-2"))
-}
-
 func TestKeys(t *testing.T) {
+	w.Cleanup()
 	t.Log("keys", w.Keys())
 }

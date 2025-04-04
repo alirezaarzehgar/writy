@@ -11,7 +11,7 @@ type Flusher struct {
 	writy   *Writy
 }
 
-func NewFlusher(cycle time.Duration) *Flusher {
+func newFlusher(cycle time.Duration) *Flusher {
 	return &Flusher{cycle: cycle, running: true}
 }
 

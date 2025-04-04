@@ -2,21 +2,36 @@ syntax = "proto3";
 option go_package = "/libwrity";
 
 service WrityService {
-    rpc Set(SetRequest) returns (SetResponse);
+    rpc Set(SetRequest) returns (Empty);
     rpc Get(GetRequest) returns (GetResponse);
+    rpc Del(DelRequest) returns (Empty);
+    rpc Keys(KeysRequest) returns (KeysResponse);
+    rpc Flush(Empty) returns (Empty);
 }
 
-message SetRequest{
+message Empty{}
+
+message SetRequest {
     string Key = 1;
     string Value = 2;
 }
 
-message SetResponse{}
-
-message GetRequest{
+message GetRequest {
     string Key = 1;
 }
 
-message GetResponse{
+message GetResponse {
     string Value = 1;
+}
+
+message DelRequest {
+    string Key = 1;
+}
+
+message KeysRequest {
+    string Key = 1;
+}
+
+message KeysResponse {
+    repeated string Keys = 1;
 }
