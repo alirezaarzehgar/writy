@@ -20,7 +20,6 @@ func TestFlush(t *testing.T) {
 	if err != nil {
 		t.Fatal("unable to open storage")
 	}
-	defer w.Cleanup()
 
 	w.Set("name", "ali")
 	t.Log("ali saved in name")
@@ -31,10 +30,12 @@ func TestFlush(t *testing.T) {
 	}
 	t.Log("key name found:", v)
 
+	w.Cleanup()
 	for i := 0; i < 10; i++ {
 		time.Sleep(time.Second / 3)
 		w.Set(fmt.Sprint("key-", i), fmt.Sprint("vvv\nasd", i))
 	}
+	w.Cleanup()
 }
 
 func TestSearchIndexByKey(t *testing.T) {
@@ -74,6 +75,13 @@ func BenchmarkWrityGet(b *testing.B) {
 		if v == nil {
 			b.Fatal("not found: key-5")
 		}
+	}
+}
+
+func TestDeleteData(t *testing.T) {
+	for i := 0; i < 10; i += 2 {
+		key := fmt.Sprint("key-", i)
+		t.Log("delete key", w.Del(key))
 	}
 }
 
