@@ -7,7 +7,7 @@ import (
 )
 
 var (
-	DefaultGarbageCollectorCycle = time.Second * 15
+	DefaultGarbageCollectorCycle = time.Minute * 2
 )
 
 type GarbageCollector struct {
