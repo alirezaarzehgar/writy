@@ -34,13 +34,18 @@ func (f *Flusher) Run(w *Writy) {
 }
 
 func (f *Flusher) flush() {
-	defer f.writy.cache.Clear()
+	glk.Lock()
+	f.writy.w8ForDaemons.Add(1)
 
 	for k, v := range f.writy.cache.List() {
 		if searchIndexByKey(f.writy, k) < 0 {
 			writeIndex(f.writy, k, v)
 		}
 	}
+
+	f.writy.cache.Clear()
+	glk.Unlock()
+	f.writy.w8ForDaemons.Done()
 }
 
 func (f *Flusher) Stop() {

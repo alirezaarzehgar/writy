@@ -8,10 +8,7 @@ import (
 	"log/slog"
 	"os"
 	"strconv"
-	"sync"
 )
-
-var lk sync.RWMutex
 
 type storageDecoder struct {
 	f *os.File
@@ -22,9 +19,6 @@ func newStorageDecoder(f *os.File) *storageDecoder {
 }
 
 func (s storageDecoder) Decode(off int64) (any, error) {
-	lk.RLock()
-	defer lk.RUnlock()
-
 	s.f.Seek(off, io.SeekStart)
 
 	reader := bufio.NewReader(s.f)
@@ -52,9 +46,6 @@ func newStorageEncoder(f *os.File) *storageEncoder {
 }
 
 func (s storageEncoder) Encode(key string, value any) int64 {
-	lk.Lock()
-	defer lk.Unlock()
-
 	offset, _ := s.f.Seek(0, io.SeekCurrent)
 	line := strconv.Quote(fmt.Sprint(value)) + "\n"
 	s.f.WriteString(line)
@@ -70,18 +61,11 @@ func newIndexEncoder(f *os.File) *indexEncoder {
 }
 
 func (s indexEncoder) Encode(key string, offset int64) error {
-	lk.Lock()
-	defer lk.Unlock()
-
-	slog.Debug("index.Encoder: encode index", "key", key, "offset", offset)
 	index := []any{key, offset, 0}
 	return json.NewEncoder(s.f).Encode(index)
 }
 
 func (s indexEncoder) Delete(nextIndOffset int64) error {
-	lk.Lock()
-	defer lk.Unlock()
-
 	slog.Debug("indexEncoder.Delete", "next index offset", nextIndOffset)
 	_, err := s.f.WriteAt([]byte("1"), nextIndOffset-3)
 	return err
@@ -114,9 +98,6 @@ func newIndexDecoder(f *os.File) *indexDecoder {
 }
 
 func (s indexDecoder) Decode() index {
-	lk.RLock()
-	defer lk.RUnlock()
-
 	var indexLine []any
 	err := json.Unmarshal(s.scnr.Bytes(), &indexLine)
 	if err != nil {

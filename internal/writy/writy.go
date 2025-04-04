@@ -6,10 +6,13 @@ import (
 	"log/slog"
 	"os"
 	"path/filepath"
+	"sync"
 	"time"
 
 	"github.com/alirezaarzehgar/writy/cache"
 )
+
+var glk sync.RWMutex
 
 type StorageType map[string]any
 
@@ -25,6 +28,8 @@ type Writy struct {
 	indexWriter   *os.File
 	flusher       *Flusher
 	cache         *cache.Cache
+	gc            *GarbageCollector
+	w8ForDaemons  *sync.WaitGroup
 }
 
 func New(path string) (*Writy, error) {
@@ -62,10 +67,13 @@ func New(path string) (*Writy, error) {
 		indexReader:   iReader,
 		indexWriter:   iWriter,
 		flusher:       newFlusher(DefaultFlushCycle),
+		gc:            newGarbageCollector(),
 		cache:         cache.New(),
+		w8ForDaemons:  &sync.WaitGroup{},
 	}
 
 	w.flusher.Run(w)
+	w.gc.Run(w, w.flusher)
 
 	return w, nil
 }
@@ -74,10 +82,16 @@ func New(path string) (*Writy, error) {
 // Checking fs for duplication is not suitable for us.
 // Initial solution is ignoring duplicated records when flushing.
 func (w Writy) Set(key string, value any) error {
+	glk.Lock()
+	defer glk.Unlock()
+
 	return w.cache.ForceSet(key, value)
 }
 
 func (w Writy) Get(key string) any {
+	glk.RLock()
+	defer glk.RUnlock()
+
 	value := w.cache.Get(key)
 	if value != nil {
 		return value
@@ -94,6 +108,9 @@ func (w Writy) Get(key string) any {
 }
 
 func (w Writy) Del(key string) error {
+	glk.Lock()
+	defer glk.Unlock()
+
 	w.cache.Del(key)
 
 	indDec := newIndexDecoder(w.indexReader)
@@ -110,6 +127,9 @@ func (w Writy) Del(key string) error {
 }
 
 func (w Writy) Keys() (keys []string) {
+	glk.RLock()
+	defer glk.RUnlock()
+
 	indDec := newIndexDecoder(w.indexReader)
 	for indDec.Scan() {
 		ind := indDec.Decode()
@@ -122,4 +142,6 @@ func (w Writy) Keys() (keys []string) {
 
 func (w Writy) Cleanup() {
 	w.flusher.flush()
+	w.gc.collect()
+	w.w8ForDaemons.Wait()
 }
