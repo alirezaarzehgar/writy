@@ -21,19 +21,17 @@ type WrityService struct {
 func (ws *WrityService) Set(c context.Context, r *libwrity.SetRequest) (*libwrity.Empty, error) {
 	for _, client := range ws.readableClients {
 		go func(req *libwrity.SetRequest) {
-			_, err := client.Set(context.TODO(), req)
+			_, err := client.Set(c, req)
 			if err != nil {
 				slog.Warn("failed to set value on slave", "error", err)
 			}
 		}(r)
-		slog.Debug("balance to slave", "request", r)
 	}
 	for _, client := range ws.writableClients {
-		_, err := client.Set(context.TODO(), r)
+		_, err := client.Set(c, r)
 		if err != nil {
 			slog.Warn("failed to set value on master", "request", r)
 		}
-		slog.Debug("balance to master", "request", r)
 	}
 	return &libwrity.Empty{}, nil
 }
@@ -45,10 +43,18 @@ func (ws *WrityService) Get(c context.Context, r *libwrity.GetRequest) (*libwrit
 
 func (ws *WrityService) Del(c context.Context, r *libwrity.DelRequest) (*libwrity.Empty, error) {
 	for _, client := range ws.readableClients {
-		go client.Del(c, r)
+		go func(req *libwrity.DelRequest) {
+			_, err := client.Del(c, req)
+			if err != nil {
+				slog.Warn("failed to del key on slave", "error", err)
+			}
+		}(r)
 	}
 	for _, client := range ws.writableClients {
-		client.Del(c, r)
+		_, err := client.Del(c, r)
+		if err != nil {
+			slog.Warn("failed to delete value on master", "request", r)
+		}
 	}
 	return &libwrity.Empty{}, nil
 }
@@ -60,7 +66,10 @@ func (ws *WrityService) Keys(c context.Context, r *libwrity.KeysRequest) (*libwr
 
 func (ws *WrityService) Flush(c context.Context, r *libwrity.Empty) (*libwrity.Empty, error) {
 	for _, client := range append(ws.readableClients, ws.writableClients...) {
-		client.Flush(c, r)
+		_, err := client.Flush(c, r)
+		if err != nil {
+			slog.Warn("failed to flush node")
+		}
 	}
 	return &libwrity.Empty{}, nil
 }
@@ -119,7 +128,7 @@ func Start(conf ServerConfig) error {
 		return fmt.Errorf("failed to create tcp connection: %w", err)
 	}
 
-	slog.Info("loadbalancer is ready")
+	slog.Info("loadbalancer is ready to work")
 	err = s.Serve(l)
 	if err != nil {
 		return fmt.Errorf("failed to serve gRPC connection: %w", err)
