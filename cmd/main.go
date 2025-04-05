@@ -8,6 +8,7 @@ import (
 	"github.com/alirezaarzehgar/writy/internal/balancer"
 	"github.com/alirezaarzehgar/writy/internal/server"
 	"github.com/alirezaarzehgar/writy/internal/writy"
+	"github.com/alirezaarzehgar/writy/libwrity"
 )
 
 func main() {
@@ -34,13 +35,14 @@ func main() {
 
 	if *isLoadbalancer {
 		conf := balancer.ServerConfig{
-			RunningAddr:       *runningAddr,
-			ReflectionEnabled: *reflecEnabled,
-			Slaves:            slaves,
-			Masters:           masters,
+			RunningAddr:            *runningAddr,
+			ReflectionEnabled:      *reflecEnabled,
+			Slaves:                 slaves,
+			Masters:                masters,
+			LoadBalancingAlgorithm: balancer.RoundRobin[libwrity.WrityServiceClient],
 		}
 
-		slog.Debug("start gRPC server", "server config", conf, "leveler", *logLevel)
+		slog.Debug("start gRPC loadbalancer server", "server config", conf, "leveler", *logLevel)
 		err := balancer.Start(conf)
 		if err != nil {
 			slog.Error("failed to start loadbalancer", "error", err)

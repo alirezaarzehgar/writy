@@ -3,6 +3,7 @@ package server
 import (
 	"context"
 	"fmt"
+	"log/slog"
 	"net"
 
 	"github.com/alirezaarzehgar/writy/internal/writy"
@@ -17,7 +18,9 @@ type WrityService struct {
 }
 
 func (ws *WrityService) Set(c context.Context, r *libwrity.SetRequest) (*libwrity.Empty, error) {
-	return &libwrity.Empty{}, ws.writy.Set(r.Key, r.Value)
+	err := ws.writy.Set(r.Key, r.Value)
+	slog.Info("set", "key", r.Key, "val", r.Value)
+	return &libwrity.Empty{}, err
 }
 
 func (ws *WrityService) Get(c context.Context, r *libwrity.GetRequest) (*libwrity.GetResponse, error) {
