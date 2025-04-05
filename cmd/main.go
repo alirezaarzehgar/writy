@@ -12,9 +12,8 @@ import (
 )
 
 func main() {
-	var slaves, masters balancer.StringArray
-	flag.Var(&slaves, "slave", "list of slaves url for loadbalancing")
-	flag.Var(&masters, "master", "list of slaves url for loadbalancing")
+	var replicas balancer.StringArray
+	flag.Var(&replicas, "replica", "list of replica addresses for loadbalancing. First replica is master")
 	runningAddr := flag.String("addr", ":8000", "running address e.g: localhost:8000, :3000. etc")
 	reflecEnabled := flag.Bool("reflection", false, "enabled gRPC reflection for testing")
 	logLevel := flag.String("leveler", "error", "log levels: error, warn, info, debug")
@@ -37,8 +36,7 @@ func main() {
 		conf := balancer.ServerConfig{
 			RunningAddr:            *runningAddr,
 			ReflectionEnabled:      *reflecEnabled,
-			Slaves:                 slaves,
-			Masters:                masters,
+			Replicas:               replicas,
 			LoadBalancingAlgorithm: balancer.RoundRobin[libwrity.WrityServiceClient],
 		}
 

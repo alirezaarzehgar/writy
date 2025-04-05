@@ -16,17 +16,13 @@ func NewLoadBalancer[Client any](algorithm Algorithm[Client]) LoadBalancer[Clien
 	return LoadBalancer[Client]{algorithm: algorithm}
 }
 
-func (lb LoadBalancer[Client]) GetClient(rClients, wClients []Client) (Client, error) {
-	if len(rClients) == 0 {
-		if len(wClients) == 0 {
-			var empty Client
-			return empty, fmt.Errorf("no masters or slaves")
-		}
-
-		return lb.algorithm(wClients), nil
+func (lb LoadBalancer[Client]) GetClient(clients []Client) (Client, error) {
+	if len(clients) == 0 {
+		var empty Client
+		return empty, fmt.Errorf("no masters or slaves")
 	}
 
-	return lb.algorithm(rClients), nil
+	return lb.algorithm(clients), nil
 }
 
 var rrCounter int64 = 0

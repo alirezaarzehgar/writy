@@ -46,11 +46,5 @@ message KeysResponse {
 }
 
 message AddNodeRequest {
-    bool IsSlave = 1;
-    string Address = 2;
-}
-
-message Node {
-    string Type = 1;
     string Address = 2;
 }
