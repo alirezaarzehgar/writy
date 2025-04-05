@@ -257,11 +257,12 @@ var WrityService_ServiceDesc = grpc.ServiceDesc{
 }
 
 const (
-	LoadBalancerService_Set_FullMethodName   = "/LoadBalancerService/Set"
-	LoadBalancerService_Get_FullMethodName   = "/LoadBalancerService/Get"
-	LoadBalancerService_Del_FullMethodName   = "/LoadBalancerService/Del"
-	LoadBalancerService_Keys_FullMethodName  = "/LoadBalancerService/Keys"
-	LoadBalancerService_Flush_FullMethodName = "/LoadBalancerService/Flush"
+	LoadBalancerService_Set_FullMethodName     = "/LoadBalancerService/Set"
+	LoadBalancerService_Get_FullMethodName     = "/LoadBalancerService/Get"
+	LoadBalancerService_Del_FullMethodName     = "/LoadBalancerService/Del"
+	LoadBalancerService_Keys_FullMethodName    = "/LoadBalancerService/Keys"
+	LoadBalancerService_Flush_FullMethodName   = "/LoadBalancerService/Flush"
+	LoadBalancerService_AddNode_FullMethodName = "/LoadBalancerService/AddNode"
 )
 
 // LoadBalancerServiceClient is the client API for LoadBalancerService service.
@@ -273,6 +274,7 @@ type LoadBalancerServiceClient interface {
 	Del(ctx context.Context, in *DelRequest, opts ...grpc.CallOption) (*Empty, error)
 	Keys(ctx context.Context, in *KeysRequest, opts ...grpc.CallOption) (*KeysResponse, error)
 	Flush(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*Empty, error)
+	AddNode(ctx context.Context, in *AddNodeRequest, opts ...grpc.CallOption) (*Empty, error)
 }
 
 type loadBalancerServiceClient struct {
@@ -328,6 +330,15 @@ func (c *loadBalancerServiceClient) Flush(ctx context.Context, in *Empty, opts .
 	return out, nil
 }
 
+func (c *loadBalancerServiceClient) AddNode(ctx context.Context, in *AddNodeRequest, opts ...grpc.CallOption) (*Empty, error) {
+	out := new(Empty)
+	err := c.cc.Invoke(ctx, LoadBalancerService_AddNode_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // LoadBalancerServiceServer is the server API for LoadBalancerService service.
 // All implementations must embed UnimplementedLoadBalancerServiceServer
 // for forward compatibility
@@ -337,6 +348,7 @@ type LoadBalancerServiceServer interface {
 	Del(context.Context, *DelRequest) (*Empty, error)
 	Keys(context.Context, *KeysRequest) (*KeysResponse, error)
 	Flush(context.Context, *Empty) (*Empty, error)
+	AddNode(context.Context, *AddNodeRequest) (*Empty, error)
 	mustEmbedUnimplementedLoadBalancerServiceServer()
 }
 
@@ -358,6 +370,9 @@ func (UnimplementedLoadBalancerServiceServer) Keys(context.Context, *KeysRequest
 }
 func (UnimplementedLoadBalancerServiceServer) Flush(context.Context, *Empty) (*Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Flush not implemented")
+}
+func (UnimplementedLoadBalancerServiceServer) AddNode(context.Context, *AddNodeRequest) (*Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method AddNode not implemented")
 }
 func (UnimplementedLoadBalancerServiceServer) mustEmbedUnimplementedLoadBalancerServiceServer() {}
 
@@ -462,6 +477,24 @@ func _LoadBalancerService_Flush_Handler(srv interface{}, ctx context.Context, de
 	return interceptor(ctx, in, info, handler)
 }
 
+func _LoadBalancerService_AddNode_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AddNodeRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(LoadBalancerServiceServer).AddNode(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: LoadBalancerService_AddNode_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(LoadBalancerServiceServer).AddNode(ctx, req.(*AddNodeRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // LoadBalancerService_ServiceDesc is the grpc.ServiceDesc for LoadBalancerService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -488,6 +521,10 @@ var LoadBalancerService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Flush",
 			Handler:    _LoadBalancerService_Flush_Handler,
+		},
+		{
+			MethodName: "AddNode",
+			Handler:    _LoadBalancerService_AddNode_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

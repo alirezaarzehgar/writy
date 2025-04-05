@@ -1,7 +1,7 @@
 package balancer
 
 import (
-	"log/slog"
+	"fmt"
 	"math/rand"
 	"sync/atomic"
 )
@@ -9,28 +9,35 @@ import (
 type Algorithm[Client any] func(clients []Client) Client
 
 type LoadBalancer[Client any] struct {
-	clients   []Client
 	algorithm Algorithm[Client]
 }
 
-func NewLoadBalancer[Client any](clients []Client, algorithm Algorithm[Client]) LoadBalancer[Client] {
-	return LoadBalancer[Client]{clients: clients, algorithm: algorithm}
+func NewLoadBalancer[Client any](algorithm Algorithm[Client]) LoadBalancer[Client] {
+	return LoadBalancer[Client]{algorithm: algorithm}
 }
 
-func (lb LoadBalancer[Client]) GetClient() Client {
-	slog.Debug("balance to a client")
-	return lb.algorithm(lb.clients)
+func (lb LoadBalancer[Client]) GetClient(rClients, wClients []Client) (Client, error) {
+	if len(rClients) == 0 {
+		if len(wClients) == 0 {
+			var empty Client
+			return empty, fmt.Errorf("no masters or slaves")
+		}
+
+		return lb.algorithm(wClients), nil
+	}
+
+	return lb.algorithm(rClients), nil
 }
 
-var rrCounter int64 = 0
+var rrCounter int64 = 1
 
 func RoundRobin[Client any](clients []Client) Client {
-	clen := int64(len(clients) - 1)
-	client := clients[rrCounter]
+	clen := int64(len(clients))
+	client := clients[rrCounter-1]
 	atomic.AddInt64(&rrCounter, 1)
 
 	if rrCounter%clen == 0 {
-		atomic.StoreInt64(&rrCounter, 0)
+		atomic.StoreInt64(&rrCounter, 1)
 	}
 	return client
 }

@@ -50,7 +50,7 @@ func Start(conf ServerConfig) error {
 		balancerService.readableClients = append(balancerService.readableClients, client)
 	}
 
-	balancerService.loadbalancer = NewLoadBalancer(balancerService.readableClients, RoundRobin)
+	balancerService.loadbalancer = NewLoadBalancer[libwrity.WrityServiceClient](RoundRobin)
 
 	s := grpc.NewServer()
 

@@ -15,8 +15,8 @@ service LoadBalancerService {
     rpc Del(DelRequest) returns (Empty);
     rpc Keys(KeysRequest) returns (KeysResponse);
     rpc Flush(Empty) returns (Empty);
+    rpc AddNode(AddNodeRequest) returns (Empty);
 }
-
 
 message Empty{}
 
@@ -43,4 +43,14 @@ message KeysRequest {
 
 message KeysResponse {
     repeated string Keys = 1;
+}
+
+message AddNodeRequest {
+    bool IsSlave = 1;
+    string Address = 2;
+}
+
+message Node {
+    string Type = 1;
+    string Address = 2;
 }
