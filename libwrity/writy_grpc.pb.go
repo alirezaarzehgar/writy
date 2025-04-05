@@ -255,3 +255,241 @@ var WrityService_ServiceDesc = grpc.ServiceDesc{
 	Streams:  []grpc.StreamDesc{},
 	Metadata: "writy.proto",
 }
+
+const (
+	LoadBalancerService_Set_FullMethodName   = "/LoadBalancerService/Set"
+	LoadBalancerService_Get_FullMethodName   = "/LoadBalancerService/Get"
+	LoadBalancerService_Del_FullMethodName   = "/LoadBalancerService/Del"
+	LoadBalancerService_Keys_FullMethodName  = "/LoadBalancerService/Keys"
+	LoadBalancerService_Flush_FullMethodName = "/LoadBalancerService/Flush"
+)
+
+// LoadBalancerServiceClient is the client API for LoadBalancerService service.
+//
+// For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
+type LoadBalancerServiceClient interface {
+	Set(ctx context.Context, in *SetRequest, opts ...grpc.CallOption) (*Empty, error)
+	Get(ctx context.Context, in *GetRequest, opts ...grpc.CallOption) (*GetResponse, error)
+	Del(ctx context.Context, in *DelRequest, opts ...grpc.CallOption) (*Empty, error)
+	Keys(ctx context.Context, in *KeysRequest, opts ...grpc.CallOption) (*KeysResponse, error)
+	Flush(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*Empty, error)
+}
+
+type loadBalancerServiceClient struct {
+	cc grpc.ClientConnInterface
+}
+
+func NewLoadBalancerServiceClient(cc grpc.ClientConnInterface) LoadBalancerServiceClient {
+	return &loadBalancerServiceClient{cc}
+}
+
+func (c *loadBalancerServiceClient) Set(ctx context.Context, in *SetRequest, opts ...grpc.CallOption) (*Empty, error) {
+	out := new(Empty)
+	err := c.cc.Invoke(ctx, LoadBalancerService_Set_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *loadBalancerServiceClient) Get(ctx context.Context, in *GetRequest, opts ...grpc.CallOption) (*GetResponse, error) {
+	out := new(GetResponse)
+	err := c.cc.Invoke(ctx, LoadBalancerService_Get_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *loadBalancerServiceClient) Del(ctx context.Context, in *DelRequest, opts ...grpc.CallOption) (*Empty, error) {
+	out := new(Empty)
+	err := c.cc.Invoke(ctx, LoadBalancerService_Del_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *loadBalancerServiceClient) Keys(ctx context.Context, in *KeysRequest, opts ...grpc.CallOption) (*KeysResponse, error) {
+	out := new(KeysResponse)
+	err := c.cc.Invoke(ctx, LoadBalancerService_Keys_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *loadBalancerServiceClient) Flush(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*Empty, error) {
+	out := new(Empty)
+	err := c.cc.Invoke(ctx, LoadBalancerService_Flush_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+// LoadBalancerServiceServer is the server API for LoadBalancerService service.
+// All implementations must embed UnimplementedLoadBalancerServiceServer
+// for forward compatibility
+type LoadBalancerServiceServer interface {
+	Set(context.Context, *SetRequest) (*Empty, error)
+	Get(context.Context, *GetRequest) (*GetResponse, error)
+	Del(context.Context, *DelRequest) (*Empty, error)
+	Keys(context.Context, *KeysRequest) (*KeysResponse, error)
+	Flush(context.Context, *Empty) (*Empty, error)
+	mustEmbedUnimplementedLoadBalancerServiceServer()
+}
+
+// UnimplementedLoadBalancerServiceServer must be embedded to have forward compatible implementations.
+type UnimplementedLoadBalancerServiceServer struct {
+}
+
+func (UnimplementedLoadBalancerServiceServer) Set(context.Context, *SetRequest) (*Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Set not implemented")
+}
+func (UnimplementedLoadBalancerServiceServer) Get(context.Context, *GetRequest) (*GetResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Get not implemented")
+}
+func (UnimplementedLoadBalancerServiceServer) Del(context.Context, *DelRequest) (*Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Del not implemented")
+}
+func (UnimplementedLoadBalancerServiceServer) Keys(context.Context, *KeysRequest) (*KeysResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Keys not implemented")
+}
+func (UnimplementedLoadBalancerServiceServer) Flush(context.Context, *Empty) (*Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Flush not implemented")
+}
+func (UnimplementedLoadBalancerServiceServer) mustEmbedUnimplementedLoadBalancerServiceServer() {}
+
+// UnsafeLoadBalancerServiceServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to LoadBalancerServiceServer will
+// result in compilation errors.
+type UnsafeLoadBalancerServiceServer interface {
+	mustEmbedUnimplementedLoadBalancerServiceServer()
+}
+
+func RegisterLoadBalancerServiceServer(s grpc.ServiceRegistrar, srv LoadBalancerServiceServer) {
+	s.RegisterService(&LoadBalancerService_ServiceDesc, srv)
+}
+
+func _LoadBalancerService_Set_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SetRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(LoadBalancerServiceServer).Set(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: LoadBalancerService_Set_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(LoadBalancerServiceServer).Set(ctx, req.(*SetRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _LoadBalancerService_Get_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(LoadBalancerServiceServer).Get(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: LoadBalancerService_Get_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(LoadBalancerServiceServer).Get(ctx, req.(*GetRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _LoadBalancerService_Del_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DelRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(LoadBalancerServiceServer).Del(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: LoadBalancerService_Del_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(LoadBalancerServiceServer).Del(ctx, req.(*DelRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _LoadBalancerService_Keys_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(KeysRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(LoadBalancerServiceServer).Keys(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: LoadBalancerService_Keys_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(LoadBalancerServiceServer).Keys(ctx, req.(*KeysRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _LoadBalancerService_Flush_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Empty)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(LoadBalancerServiceServer).Flush(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: LoadBalancerService_Flush_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(LoadBalancerServiceServer).Flush(ctx, req.(*Empty))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+// LoadBalancerService_ServiceDesc is the grpc.ServiceDesc for LoadBalancerService service.
+// It's only intended for direct use with grpc.RegisterService,
+// and not to be introspected or modified (even as a copy)
+var LoadBalancerService_ServiceDesc = grpc.ServiceDesc{
+	ServiceName: "LoadBalancerService",
+	HandlerType: (*LoadBalancerServiceServer)(nil),
+	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "Set",
+			Handler:    _LoadBalancerService_Set_Handler,
+		},
+		{
+			MethodName: "Get",
+			Handler:    _LoadBalancerService_Get_Handler,
+		},
+		{
+			MethodName: "Del",
+			Handler:    _LoadBalancerService_Del_Handler,
+		},
+		{
+			MethodName: "Keys",
+			Handler:    _LoadBalancerService_Keys_Handler,
+		},
+		{
+			MethodName: "Flush",
+			Handler:    _LoadBalancerService_Flush_Handler,
+		},
+	},
+	Streams:  []grpc.StreamDesc{},
+	Metadata: "writy.proto",
+}

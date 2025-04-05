@@ -11,14 +11,14 @@ import (
 	"google.golang.org/grpc/reflection"
 )
 
-type WrityService struct {
+type LoadBalancerService struct {
 	loadbalancer    LoadBalancer[libwrity.WrityServiceClient]
 	readableClients []libwrity.WrityServiceClient
 	writableClients []libwrity.WrityServiceClient
-	libwrity.UnimplementedWrityServiceServer
+	libwrity.UnimplementedLoadBalancerServiceServer
 }
 
-func (ws *WrityService) Set(c context.Context, r *libwrity.SetRequest) (*libwrity.Empty, error) {
+func (ws *LoadBalancerService) Set(c context.Context, r *libwrity.SetRequest) (*libwrity.Empty, error) {
 	for _, client := range ws.readableClients {
 		go func(req *libwrity.SetRequest) {
 			_, err := client.Set(c, req)
@@ -36,12 +36,12 @@ func (ws *WrityService) Set(c context.Context, r *libwrity.SetRequest) (*libwrit
 	return &libwrity.Empty{}, nil
 }
 
-func (ws *WrityService) Get(c context.Context, r *libwrity.GetRequest) (*libwrity.GetResponse, error) {
+func (ws *LoadBalancerService) Get(c context.Context, r *libwrity.GetRequest) (*libwrity.GetResponse, error) {
 	client := ws.loadbalancer.GetClient()
 	return client.Get(c, r)
 }
 
-func (ws *WrityService) Del(c context.Context, r *libwrity.DelRequest) (*libwrity.Empty, error) {
+func (ws *LoadBalancerService) Del(c context.Context, r *libwrity.DelRequest) (*libwrity.Empty, error) {
 	for _, client := range ws.readableClients {
 		go func(req *libwrity.DelRequest) {
 			_, err := client.Del(c, req)
@@ -59,12 +59,12 @@ func (ws *WrityService) Del(c context.Context, r *libwrity.DelRequest) (*libwrit
 	return &libwrity.Empty{}, nil
 }
 
-func (ws *WrityService) Keys(c context.Context, r *libwrity.KeysRequest) (*libwrity.KeysResponse, error) {
+func (ws *LoadBalancerService) Keys(c context.Context, r *libwrity.KeysRequest) (*libwrity.KeysResponse, error) {
 	client := ws.loadbalancer.GetClient()
 	return client.Keys(c, r)
 }
 
-func (ws *WrityService) Flush(c context.Context, r *libwrity.Empty) (*libwrity.Empty, error) {
+func (ws *LoadBalancerService) Flush(c context.Context, r *libwrity.Empty) (*libwrity.Empty, error) {
 	for _, client := range append(ws.readableClients, ws.writableClients...) {
 		_, err := client.Flush(c, r)
 		if err != nil {
@@ -94,7 +94,7 @@ type ServerConfig struct {
 }
 
 func Start(conf ServerConfig) error {
-	writyService := &WrityService{}
+	balancerService := &LoadBalancerService{}
 
 	for _, master := range conf.Masters {
 		conn, err := grpc.NewClient(master, grpc.WithInsecure())
@@ -102,7 +102,7 @@ func Start(conf ServerConfig) error {
 			return fmt.Errorf("failed to add new master connection: %s: %w", master, err)
 		}
 		client := libwrity.NewWrityServiceClient(conn)
-		writyService.writableClients = append(writyService.writableClients, client)
+		balancerService.writableClients = append(balancerService.writableClients, client)
 	}
 
 	for _, slave := range conf.Slaves {
@@ -111,14 +111,14 @@ func Start(conf ServerConfig) error {
 			return fmt.Errorf("failed to add new slave connection: %s: %w", slave, err)
 		}
 		client := libwrity.NewWrityServiceClient(conn)
-		writyService.readableClients = append(writyService.readableClients, client)
+		balancerService.readableClients = append(balancerService.readableClients, client)
 	}
 
-	writyService.loadbalancer = NewLoadBalancer(writyService.readableClients, RoundRobin)
+	balancerService.loadbalancer = NewLoadBalancer(balancerService.readableClients, RoundRobin)
 
 	s := grpc.NewServer()
 
-	libwrity.RegisterWrityServiceServer(s, writyService)
+	libwrity.RegisterLoadBalancerServiceServer(s, balancerService)
 	if conf.ReflectionEnabled {
 		reflection.Register(s)
 	}

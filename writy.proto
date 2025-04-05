@@ -9,6 +9,15 @@ service WrityService {
     rpc Flush(Empty) returns (Empty);
 }
 
+service LoadBalancerService {
+    rpc Set(SetRequest) returns (Empty);
+    rpc Get(GetRequest) returns (GetResponse);
+    rpc Del(DelRequest) returns (Empty);
+    rpc Keys(KeysRequest) returns (KeysResponse);
+    rpc Flush(Empty) returns (Empty);
+}
+
+
 message Empty{}
 
 message SetRequest {
