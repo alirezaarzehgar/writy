@@ -29,15 +29,15 @@ func (lb LoadBalancer[Client]) GetClient(rClients, wClients []Client) (Client, e
 	return lb.algorithm(rClients), nil
 }
 
-var rrCounter int64 = 1
+var rrCounter int64 = 0
 
 func RoundRobin[Client any](clients []Client) Client {
 	clen := int64(len(clients))
-	client := clients[rrCounter-1]
+	client := clients[rrCounter]
 	atomic.AddInt64(&rrCounter, 1)
 
-	if rrCounter%clen == 0 {
-		atomic.StoreInt64(&rrCounter, 1)
+	if rrCounter == clen {
+		atomic.StoreInt64(&rrCounter, 0)
 	}
 	return client
 }
