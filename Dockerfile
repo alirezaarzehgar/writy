@@ -1,7 +1,6 @@
 FROM golang:1.24 AS builder
 WORKDIR /app
 
-COPY vendor vendor
 COPY cmd cmd
 COPY internal internal
 COPY libwrity libwrity
