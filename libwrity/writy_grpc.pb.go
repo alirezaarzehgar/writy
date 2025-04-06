@@ -33,7 +33,7 @@ type WrityServiceClient interface {
 	Set(ctx context.Context, in *SetRequest, opts ...grpc.CallOption) (*Empty, error)
 	Get(ctx context.Context, in *GetRequest, opts ...grpc.CallOption) (*GetResponse, error)
 	Del(ctx context.Context, in *DelRequest, opts ...grpc.CallOption) (*Empty, error)
-	Keys(ctx context.Context, in *KeysRequest, opts ...grpc.CallOption) (*KeysResponse, error)
+	Keys(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*KeysResponse, error)
 	Flush(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*Empty, error)
 }
 
@@ -72,7 +72,7 @@ func (c *writyServiceClient) Del(ctx context.Context, in *DelRequest, opts ...gr
 	return out, nil
 }
 
-func (c *writyServiceClient) Keys(ctx context.Context, in *KeysRequest, opts ...grpc.CallOption) (*KeysResponse, error) {
+func (c *writyServiceClient) Keys(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*KeysResponse, error) {
 	out := new(KeysResponse)
 	err := c.cc.Invoke(ctx, WrityService_Keys_FullMethodName, in, out, opts...)
 	if err != nil {
@@ -97,7 +97,7 @@ type WrityServiceServer interface {
 	Set(context.Context, *SetRequest) (*Empty, error)
 	Get(context.Context, *GetRequest) (*GetResponse, error)
 	Del(context.Context, *DelRequest) (*Empty, error)
-	Keys(context.Context, *KeysRequest) (*KeysResponse, error)
+	Keys(context.Context, *Empty) (*KeysResponse, error)
 	Flush(context.Context, *Empty) (*Empty, error)
 	mustEmbedUnimplementedWrityServiceServer()
 }
@@ -115,7 +115,7 @@ func (UnimplementedWrityServiceServer) Get(context.Context, *GetRequest) (*GetRe
 func (UnimplementedWrityServiceServer) Del(context.Context, *DelRequest) (*Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Del not implemented")
 }
-func (UnimplementedWrityServiceServer) Keys(context.Context, *KeysRequest) (*KeysResponse, error) {
+func (UnimplementedWrityServiceServer) Keys(context.Context, *Empty) (*KeysResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Keys not implemented")
 }
 func (UnimplementedWrityServiceServer) Flush(context.Context, *Empty) (*Empty, error) {
@@ -189,7 +189,7 @@ func _WrityService_Del_Handler(srv interface{}, ctx context.Context, dec func(in
 }
 
 func _WrityService_Keys_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(KeysRequest)
+	in := new(Empty)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -201,7 +201,7 @@ func _WrityService_Keys_Handler(srv interface{}, ctx context.Context, dec func(i
 		FullMethod: WrityService_Keys_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(WrityServiceServer).Keys(ctx, req.(*KeysRequest))
+		return srv.(WrityServiceServer).Keys(ctx, req.(*Empty))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -274,7 +274,7 @@ type LoadBalancerServiceClient interface {
 	Set(ctx context.Context, in *SetRequest, opts ...grpc.CallOption) (*Empty, error)
 	Get(ctx context.Context, in *GetRequest, opts ...grpc.CallOption) (*GetResponse, error)
 	Del(ctx context.Context, in *DelRequest, opts ...grpc.CallOption) (*Empty, error)
-	Keys(ctx context.Context, in *KeysRequest, opts ...grpc.CallOption) (*KeysResponse, error)
+	Keys(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*KeysResponse, error)
 	Flush(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*Empty, error)
 	AddNode(ctx context.Context, in *AddNodeRequest, opts ...grpc.CallOption) (*Empty, error)
 	DelNode(ctx context.Context, in *DelNodeRequest, opts ...grpc.CallOption) (*Empty, error)
@@ -316,7 +316,7 @@ func (c *loadBalancerServiceClient) Del(ctx context.Context, in *DelRequest, opt
 	return out, nil
 }
 
-func (c *loadBalancerServiceClient) Keys(ctx context.Context, in *KeysRequest, opts ...grpc.CallOption) (*KeysResponse, error) {
+func (c *loadBalancerServiceClient) Keys(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*KeysResponse, error) {
 	out := new(KeysResponse)
 	err := c.cc.Invoke(ctx, LoadBalancerService_Keys_FullMethodName, in, out, opts...)
 	if err != nil {
@@ -368,7 +368,7 @@ type LoadBalancerServiceServer interface {
 	Set(context.Context, *SetRequest) (*Empty, error)
 	Get(context.Context, *GetRequest) (*GetResponse, error)
 	Del(context.Context, *DelRequest) (*Empty, error)
-	Keys(context.Context, *KeysRequest) (*KeysResponse, error)
+	Keys(context.Context, *Empty) (*KeysResponse, error)
 	Flush(context.Context, *Empty) (*Empty, error)
 	AddNode(context.Context, *AddNodeRequest) (*Empty, error)
 	DelNode(context.Context, *DelNodeRequest) (*Empty, error)
@@ -389,7 +389,7 @@ func (UnimplementedLoadBalancerServiceServer) Get(context.Context, *GetRequest) 
 func (UnimplementedLoadBalancerServiceServer) Del(context.Context, *DelRequest) (*Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Del not implemented")
 }
-func (UnimplementedLoadBalancerServiceServer) Keys(context.Context, *KeysRequest) (*KeysResponse, error) {
+func (UnimplementedLoadBalancerServiceServer) Keys(context.Context, *Empty) (*KeysResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Keys not implemented")
 }
 func (UnimplementedLoadBalancerServiceServer) Flush(context.Context, *Empty) (*Empty, error) {
@@ -472,7 +472,7 @@ func _LoadBalancerService_Del_Handler(srv interface{}, ctx context.Context, dec 
 }
 
 func _LoadBalancerService_Keys_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(KeysRequest)
+	in := new(Empty)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -484,7 +484,7 @@ func _LoadBalancerService_Keys_Handler(srv interface{}, ctx context.Context, dec
 		FullMethod: LoadBalancerService_Keys_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(LoadBalancerServiceServer).Keys(ctx, req.(*KeysRequest))
+		return srv.(LoadBalancerServiceServer).Keys(ctx, req.(*Empty))
 	}
 	return interceptor(ctx, in, info, handler)
 }

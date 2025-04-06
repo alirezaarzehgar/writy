@@ -4,6 +4,7 @@ import (
 	"flag"
 	"log/slog"
 	"os"
+	"time"
 
 	"github.com/alirezaarzehgar/writy/internal/balancer"
 	"github.com/alirezaarzehgar/writy/internal/server"
@@ -18,6 +19,7 @@ func main() {
 	logLevel := flag.String("leveler", "error", "log levels: error, warn, info, debug")
 	isLoadbalancer := flag.Bool("balancer", false, "enable balancer to run a loadbalancer")
 	dbPath := flag.String("db", writy.DefaultStoragePath, "database path for indexing and storage")
+	gcCycle := flag.Int("gcycle", 60, "garbage collector will remove logically deleted rows every n seconds.")
 	flag.Parse()
 
 	level := slog.LevelError
@@ -49,6 +51,7 @@ func main() {
 			DbPath:            *dbPath,
 			RunningAddr:       *runningAddr,
 			ReflectionEnabled: *reflecEnabled,
+			GcCycle:           time.Second * time.Duration(*gcCycle),
 		}
 
 		slog.Debug("start gRPC server", "server config", conf, "leveler", *logLevel)

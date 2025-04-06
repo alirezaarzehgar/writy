@@ -55,6 +55,9 @@ func Start(conf ServerConfig) error {
 		return fmt.Errorf("failed to create tcp connection: %w", err)
 	}
 
+	syncer := NewSyncer(balancerService)
+	syncer.Start()
+
 	slog.Info("loadbalancer is ready to work")
 	err = s.Serve(l)
 	if err != nil {

@@ -5,7 +5,7 @@ service WrityService {
     rpc Set(SetRequest) returns (Empty);
     rpc Get(GetRequest) returns (GetResponse);
     rpc Del(DelRequest) returns (Empty);
-    rpc Keys(KeysRequest) returns (KeysResponse);
+    rpc Keys(Empty) returns (KeysResponse);
     rpc Flush(Empty) returns (Empty);
 }
 
@@ -13,7 +13,7 @@ service LoadBalancerService {
     rpc Set(SetRequest) returns (Empty);
     rpc Get(GetRequest) returns (GetResponse);
     rpc Del(DelRequest) returns (Empty);
-    rpc Keys(KeysRequest) returns (KeysResponse);
+    rpc Keys(Empty) returns (KeysResponse);
     rpc Flush(Empty) returns (Empty);
     rpc AddNode(AddNodeRequest) returns (Empty);
     rpc DelNode(DelNodeRequest) returns (Empty);
@@ -36,10 +36,6 @@ message GetResponse {
 }
 
 message DelRequest {
-    string Key = 1;
-}
-
-message KeysRequest {
     string Key = 1;
 }
 

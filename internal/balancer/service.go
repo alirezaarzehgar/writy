@@ -49,7 +49,7 @@ func (lbs *LoadBalancerService) Del(c context.Context, req *libwrity.DelRequest)
 	})
 }
 
-func (lbs *LoadBalancerService) Keys(c context.Context, req *libwrity.KeysRequest) (*libwrity.KeysResponse, error) {
+func (lbs *LoadBalancerService) Keys(c context.Context, req *libwrity.Empty) (*libwrity.KeysResponse, error) {
 	return readOpFaileover[*libwrity.KeysResponse](lbs, func(r Replica) (*libwrity.KeysResponse, error) {
 		return r.Client.Keys(context.TODO(), req)
 	})

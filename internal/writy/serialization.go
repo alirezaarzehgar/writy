@@ -61,6 +61,10 @@ func newIndexEncoder(f *os.File) *indexEncoder {
 }
 
 func (s indexEncoder) Encode(key string, offset int64) error {
+	if key == "" || offset < 0 {
+		return fmt.Errorf("empty data")
+	}
+
 	index := []any{key, offset, 0}
 	return json.NewEncoder(s.f).Encode(index)
 }
