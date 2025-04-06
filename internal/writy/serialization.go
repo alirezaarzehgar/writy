@@ -102,16 +102,19 @@ func (s indexDecoder) Decode() index {
 	err := json.Unmarshal(s.scnr.Bytes(), &indexLine)
 	if err != nil {
 		slog.Warn("failed to unmarshal line", "error", err)
+		return index{}
 	}
 
 	key := fmt.Sprint(indexLine[IndexKey])
 	storageOffset, err := strconv.ParseInt(fmt.Sprint(indexLine[IndexOffset]), 0, 64)
 	if err != nil {
 		slog.Warn("failed to parse int", "error", err)
+		return index{}
 	}
 	isDeleted, err := strconv.ParseBool(fmt.Sprint(indexLine[IndexIsDeleted]))
 	if err != nil {
 		slog.Warn("failed to parse bool", "error", err)
+		return index{}
 	}
 
 	return index{Key: key, ValueOffset: storageOffset, IsDeleted: isDeleted, NextIndexOffset: s.currentOffset}
