@@ -12,10 +12,11 @@ Moving forward, we will definitely dedicate more time to writing tests.*
 
 - [x] master-slave architecture
 - [x] Faile over system
-- [ ] CI/CD
+- [x] CI/CD
 - [ ] Test
 - [ ] Example
 - [ ] Documentation
+- [ ] writy-operator
 
 # Contribution
 We appreciate every contribution. Everything is worth contributing.
