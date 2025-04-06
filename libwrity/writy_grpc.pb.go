@@ -263,6 +263,8 @@ const (
 	LoadBalancerService_Keys_FullMethodName    = "/LoadBalancerService/Keys"
 	LoadBalancerService_Flush_FullMethodName   = "/LoadBalancerService/Flush"
 	LoadBalancerService_AddNode_FullMethodName = "/LoadBalancerService/AddNode"
+	LoadBalancerService_DelNode_FullMethodName = "/LoadBalancerService/DelNode"
+	LoadBalancerService_Nodes_FullMethodName   = "/LoadBalancerService/Nodes"
 )
 
 // LoadBalancerServiceClient is the client API for LoadBalancerService service.
@@ -275,6 +277,8 @@ type LoadBalancerServiceClient interface {
 	Keys(ctx context.Context, in *KeysRequest, opts ...grpc.CallOption) (*KeysResponse, error)
 	Flush(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*Empty, error)
 	AddNode(ctx context.Context, in *AddNodeRequest, opts ...grpc.CallOption) (*Empty, error)
+	DelNode(ctx context.Context, in *DelNodeRequest, opts ...grpc.CallOption) (*Empty, error)
+	Nodes(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*NodesResponse, error)
 }
 
 type loadBalancerServiceClient struct {
@@ -339,6 +343,24 @@ func (c *loadBalancerServiceClient) AddNode(ctx context.Context, in *AddNodeRequ
 	return out, nil
 }
 
+func (c *loadBalancerServiceClient) DelNode(ctx context.Context, in *DelNodeRequest, opts ...grpc.CallOption) (*Empty, error) {
+	out := new(Empty)
+	err := c.cc.Invoke(ctx, LoadBalancerService_DelNode_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *loadBalancerServiceClient) Nodes(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*NodesResponse, error) {
+	out := new(NodesResponse)
+	err := c.cc.Invoke(ctx, LoadBalancerService_Nodes_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // LoadBalancerServiceServer is the server API for LoadBalancerService service.
 // All implementations must embed UnimplementedLoadBalancerServiceServer
 // for forward compatibility
@@ -349,6 +371,8 @@ type LoadBalancerServiceServer interface {
 	Keys(context.Context, *KeysRequest) (*KeysResponse, error)
 	Flush(context.Context, *Empty) (*Empty, error)
 	AddNode(context.Context, *AddNodeRequest) (*Empty, error)
+	DelNode(context.Context, *DelNodeRequest) (*Empty, error)
+	Nodes(context.Context, *Empty) (*NodesResponse, error)
 	mustEmbedUnimplementedLoadBalancerServiceServer()
 }
 
@@ -373,6 +397,12 @@ func (UnimplementedLoadBalancerServiceServer) Flush(context.Context, *Empty) (*E
 }
 func (UnimplementedLoadBalancerServiceServer) AddNode(context.Context, *AddNodeRequest) (*Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method AddNode not implemented")
+}
+func (UnimplementedLoadBalancerServiceServer) DelNode(context.Context, *DelNodeRequest) (*Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DelNode not implemented")
+}
+func (UnimplementedLoadBalancerServiceServer) Nodes(context.Context, *Empty) (*NodesResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Nodes not implemented")
 }
 func (UnimplementedLoadBalancerServiceServer) mustEmbedUnimplementedLoadBalancerServiceServer() {}
 
@@ -495,6 +525,42 @@ func _LoadBalancerService_AddNode_Handler(srv interface{}, ctx context.Context, 
 	return interceptor(ctx, in, info, handler)
 }
 
+func _LoadBalancerService_DelNode_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DelNodeRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(LoadBalancerServiceServer).DelNode(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: LoadBalancerService_DelNode_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(LoadBalancerServiceServer).DelNode(ctx, req.(*DelNodeRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _LoadBalancerService_Nodes_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Empty)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(LoadBalancerServiceServer).Nodes(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: LoadBalancerService_Nodes_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(LoadBalancerServiceServer).Nodes(ctx, req.(*Empty))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // LoadBalancerService_ServiceDesc is the grpc.ServiceDesc for LoadBalancerService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -525,6 +591,14 @@ var LoadBalancerService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "AddNode",
 			Handler:    _LoadBalancerService_AddNode_Handler,
+		},
+		{
+			MethodName: "DelNode",
+			Handler:    _LoadBalancerService_DelNode_Handler,
+		},
+		{
+			MethodName: "Nodes",
+			Handler:    _LoadBalancerService_Nodes_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
