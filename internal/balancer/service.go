@@ -13,7 +13,7 @@ import (
 )
 
 var (
-	DefaultAssumeAliveCycle = time.Second * 10
+	DefaultAssumeAliveCycle = time.Minute * 2
 )
 
 type Replica struct {
