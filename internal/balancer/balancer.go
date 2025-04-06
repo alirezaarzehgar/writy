@@ -24,23 +24,24 @@ func (i *StringArray) Set(value string) error {
 type ServerConfig struct {
 	RunningAddr            string
 	ReflectionEnabled      bool
-	Replicas               StringArray
-	LoadBalancingAlgorithm Algorithm[libwrity.WrityServiceClient] `json:"-"`
+	ReplicaAddresses       StringArray
+	LoadBalancingAlgorithm Algorithm `json:"-"`
 }
 
 func Start(conf ServerConfig) error {
 	balancerService := &LoadBalancerService{}
 
-	for _, replica := range conf.Replicas {
-		conn, err := grpc.NewClient(replica, grpc.WithInsecure())
+	for _, address := range conf.ReplicaAddresses {
+		conn, err := grpc.NewClient(address, grpc.WithInsecure())
 		if err != nil {
-			return fmt.Errorf("failed to add new replica connection: %s: %w", replica, err)
+			return fmt.Errorf("failed to add new replica connection: %s: %w", address, err)
 		}
 		client := libwrity.NewWrityServiceClient(conn)
-		balancerService.clients = append(balancerService.clients, client)
+		replica := Replica{Connection: conn, Client: client, Address: address}
+		balancerService.replicas = append(balancerService.replicas, replica)
 	}
 
-	balancerService.loadbalancer = NewLoadBalancer[libwrity.WrityServiceClient](RoundRobin)
+	balancerService.loadbalancer = NewLoadBalancer(conf.LoadBalancingAlgorithm)
 
 	s := grpc.NewServer()
 

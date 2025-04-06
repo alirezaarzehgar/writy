@@ -8,7 +8,6 @@ import (
 	"github.com/alirezaarzehgar/writy/internal/balancer"
 	"github.com/alirezaarzehgar/writy/internal/server"
 	"github.com/alirezaarzehgar/writy/internal/writy"
-	"github.com/alirezaarzehgar/writy/libwrity"
 )
 
 func main() {
@@ -36,8 +35,8 @@ func main() {
 		conf := balancer.ServerConfig{
 			RunningAddr:            *runningAddr,
 			ReflectionEnabled:      *reflecEnabled,
-			Replicas:               replicas,
-			LoadBalancingAlgorithm: balancer.RoundRobin[libwrity.WrityServiceClient],
+			ReplicaAddresses:       replicas,
+			LoadBalancingAlgorithm: balancer.RoundRobin,
 		}
 
 		slog.Debug("start gRPC loadbalancer server", "server config", conf, "leveler", *logLevel)

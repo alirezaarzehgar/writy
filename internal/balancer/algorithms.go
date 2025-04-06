@@ -2,43 +2,55 @@ package balancer
 
 import (
 	"fmt"
+	"log/slog"
 	"math/rand"
 	"sync/atomic"
 )
 
-type Algorithm[Client any] func(clients []Client) Client
+type Algorithm func(replicas []Replica) Replica
 
-type LoadBalancer[Client any] struct {
-	algorithm Algorithm[Client]
+type LoadBalancer struct {
+	algorithm Algorithm
 }
 
-func NewLoadBalancer[Client any](algorithm Algorithm[Client]) LoadBalancer[Client] {
-	return LoadBalancer[Client]{algorithm: algorithm}
+func NewLoadBalancer(algorithm Algorithm) LoadBalancer {
+	return LoadBalancer{algorithm: algorithm}
 }
 
-func (lb LoadBalancer[Client]) GetClient(clients []Client) (Client, error) {
-	if len(clients) == 0 {
-		var empty Client
-		return empty, fmt.Errorf("no masters or slaves")
+func (lb LoadBalancer) GetClient(replicas []Replica) (Replica, error) {
+	var availableReplicas []Replica
+	for _, r := range replicas {
+		if !r.IsDown {
+			availableReplicas = append(availableReplicas, r)
+		}
 	}
 
-	return lb.algorithm(clients), nil
+	if len(availableReplicas) == 0 {
+		return Replica{}, fmt.Errorf("no masters or slaves")
+	}
+
+	r := lb.algorithm(availableReplicas)
+	slog.Debug("balancing load", "address", r.Address)
+	return r, nil
 }
 
 var rrCounter int64 = 0
 
-func RoundRobin[Client any](clients []Client) Client {
-	clen := int64(len(clients))
-	client := clients[rrCounter]
-	atomic.AddInt64(&rrCounter, 1)
+func RoundRobin(replicas []Replica) Replica {
+	clen := int64(len(replicas))
 
-	if rrCounter == clen {
+	if rrCounter >= clen {
 		atomic.StoreInt64(&rrCounter, 0)
 	}
+
+	client := replicas[rrCounter]
+
+	atomic.AddInt64(&rrCounter, 1)
+
 	return client
 }
 
-func Randomized[Client any](clients []Client) Client {
-	i := rand.Intn(len(clients))
-	return clients[i]
+func Randomized(replicas []Replica) Replica {
+	i := rand.Intn(len(replicas))
+	return replicas[i]
 }
