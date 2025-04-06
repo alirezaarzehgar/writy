@@ -5,12 +5,12 @@ Writy is suitable for write-heavy systems. It communicates using gRPC and has an
 caching system. Writes and reads are stored in the cache first and flushed to the filesystem after a certain time.
 
 # TODO
-- master-slave architecture
-- Faile over system
-- CI/CD
-- Test
-- Example
-- Documentation
+- [x] master-slave architecture
+- [x] Faile over system
+- [ ] CI/CD
+- [ ] Test
+- [ ] Example
+- [ ] Documentation
 
 # Contribution
 We appreciate every contribution. Everything is worth contributing.
