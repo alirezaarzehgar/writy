@@ -1,11 +1,15 @@
 FROM golang:1.24 AS builder
 WORKDIR /app
 
+COPY vendor vendor
 COPY cmd cmd
 COPY internal internal
-COPY go.mod .
+COPY libwrity libwrity
+COPY cache cache
+COPY Makefile VERSION go.mod go.sum ./
 
-RUN CGO_ENABLED=0 go build -o /bin/writy cmd/main.go
+RUN go mod download && \
+    CGO_ENABLED=0 go build -o /bin/writy cmd/main.go
 
 FROM scratch
 COPY --from=builder /bin/writy /bin/writy
